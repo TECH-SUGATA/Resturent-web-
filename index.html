@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aethelgard | The Future of Fine Dining</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+tailwind.config = {
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        "on-primary-fixed-variant": "#005236","surface-container-highest": "#353534","surface": "#131313","on-secondary-fixed-variant": "#284f33","on-surface": "#e5e2e1","primary-container": "#002e1d","on-secondary-fixed": "#00210d","primary-fixed-dim": "#4edea3","surface-tint": "#4edea3","background": "#131313","error": "#ffb4ab","primary": "#4edea3","outline": "#8b938a","surface-variant": "#353534","on-background": "#e5e2e1","secondary-container": "#284f33","on-tertiary-container": "#4f3e00","on-tertiary-fixed-variant": "#574500","surface-container-low": "#1c1b1b","on-primary-container": "#00a270","on-tertiary": "#3c2f00","on-secondary": "#10381f","outline-variant": "#424942","surface-bright": "#3a3939","tertiary-fixed-dim": "#e9c349","surface-container-high": "#2a2a2a","on-error-container": "#ffdad6","on-primary-fixed": "#002113","tertiary": "#eac34a","surface-dim": "#131313","on-tertiary-fixed": "#241a00","tertiary-fixed": "#ffe088","secondary": "#a6d1ad","inverse-primary": "#006c49","surface-container": "#201f1f","primary-fixed": "#6ffbbe","error-container": "#93000a","secondary-fixed-dim": "#a6d1ad","inverse-on-surface": "#313030","on-secondary-container": "#95bf9d","tertiary-container": "#cca830","secondary-fixed": "#c1edc8","on-primary": "#003824","surface-container-lowest": "#0e0e0e","inverse-surface": "#e5e2e1","on-error": "#690005","on-surface-variant": "#c1c8bf"
+      },
+      borderRadius: { "DEFAULT": "0.125rem","lg": "0.25rem","xl": "0.5rem","full": "0.75rem" },
+      fontFamily: { "headline": ["Space Grotesk"],"body": ["Manrope"],"label": ["Manrope"] }
+    }
+  }
+}
+</script>
+<style>
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+.glass-panel { background: rgba(53,53,52,0.4); backdrop-filter: blur(20px); border-top: 1px solid rgba(111,251,190,0.1); border-left: 1px solid rgba(111,251,190,0.1); }
+.glass-card { background: rgba(32,31,31,0.6); backdrop-filter: blur(24px); border: 1px solid rgba(111,251,190,0.1); }
+.hero-gradient { background: linear-gradient(180deg, rgba(0,46,29,0.9) 0%, rgba(19,19,19,0.7) 50%, rgba(19,19,19,1) 100%); }
+.text-glow { text-shadow: 0 0 15px rgba(78,222,163,0.3); }
+.button-glow { box-shadow: 0 0 15px rgba(78,222,163,0.3); }
+.gold-glow { box-shadow: 0 0 25px rgba(234,195,74,0.3); }
+.emerald-glow { box-shadow: 0 0 15px rgba(78,222,163,0.2); }
+.form-input-glow:focus { outline: none; border-bottom: 2px solid #eac34a; box-shadow: 0 4px 12px -4px rgba(234,195,74,0.3); }
+.aperture-bg { background: radial-gradient(circle at center, rgba(0,46,29,0.8) 0%, #131313 100%); }
+.spotlight { background: radial-gradient(circle at 50% 50%, rgba(0,46,29,0.3) 0%, rgba(19,19,19,1) 70%); }
+.page { display: none; }
+.page.active { display: block; }
+.nav-transition { transition: all 0.3s ease; }
+body { background-image: radial-gradient(circle at 50% 0%, #002e1d 0%, #131313 70%); }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.category-btn.active { background-color: #4edea3; color: #003824; }
+.mood-card.selected { border: 2px solid #4edea3; background: rgba(0,46,29,0.4); }
+.time-slot.selected { background: rgba(78,222,163,0.3); border-color: #4edea3; color: #4edea3; }
+.sidebar-link.active { color: #4edea3; background: rgba(78,222,163,0.1); border-radius: 0.5rem; }
+.tab-btn.active { border-bottom: 2px solid #4edea3; color: #4edea3; }
+</style>
+</head>
+<body class="bg-surface text-on-surface font-body overflow-x-hidden">
+
+<!-- ═══════════════════════════════════════════════════ TOP NAVIGATION ═══════════════════════════════════════════════════ -->
+<nav id="main-nav" class="fixed top-0 w-full z-50 bg-transparent backdrop-blur-xl border-b border-white/10 shadow-2xl shadow-black/50">
+  <div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto">
+    <button onclick="showPage('home')" class="text-2xl font-bold tracking-tighter text-primary uppercase font-headline">Aethelgard</button>
+    <div class="hidden md:flex items-center gap-8 font-headline tracking-tight">
+      <button onclick="showPage('menu')" class="nav-link text-on-surface-variant hover:text-primary transition-colors" id="nav-menu">Menu</button>
+      <button onclick="showPage('home'); setTimeout(()=>scrollTo('#experiences'),300)" class="nav-link text-on-surface-variant hover:text-primary transition-colors">Experiences</button>
+      <button onclick="showPage('home'); setTimeout(()=>scrollTo('#cellar'),300)" class="nav-link text-on-surface-variant hover:text-primary transition-colors">Cellar</button>
+      <button onclick="showPage('reservations')" class="nav-link text-on-surface-variant hover:text-primary transition-colors" id="nav-reservations">Reservations</button>
+    </div>
+    <div class="flex items-center gap-4">
+      <button onclick="showPage('auth')" class="hidden lg:block text-on-surface-variant hover:text-primary transition-colors text-sm font-medium">Sign In</button>
+      <button onclick="showPage('auth')" class="bg-primary text-on-primary px-6 py-2 rounded-xl font-bold text-sm tracking-tight button-glow hover:brightness-110 transition-all">Join the Circle</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Sidebar Nav (Dashboard) -->
+<aside id="sidebar" class="hidden lg:flex flex-col h-screen p-6 bg-zinc-900/90 backdrop-blur-2xl text-emerald-400 font-body font-medium w-72 fixed left-0 border-r border-white/5 shadow-[20px_0_40px_rgba(0,0,0,0.4)] z-50" style="display:none!important;">
+  <div class="mb-10 px-4">
+    <button onclick="showPage('home')" class="text-xl font-bold text-emerald-400 font-headline">Aethelgard</button>
+  </div>
+  <div class="flex items-center gap-4 px-4 mb-8">
+    <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-emerald-400/30 bg-primary-container flex items-center justify-center text-primary font-bold">JA</div>
+    <div>
+      <p class="text-sm font-headline font-bold text-on-surface">Aethelgard Member</p>
+      <p class="text-xs text-zinc-400 uppercase tracking-widest">Gold Tier</p>
+    </div>
+  </div>
+  <nav class="flex-1 space-y-2">
+    <button onclick="showPage('dashboard')" class="sidebar-link active w-full flex items-center gap-3 px-4 py-3 transition-all">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span><span>Dashboard</span>
+    </button>
+    <button onclick="showPage('reservations')" class="sidebar-link w-full flex items-center gap-3 text-zinc-400 hover:text-zinc-100 px-4 py-3 hover:bg-emerald-500/10 transition-all">
+      <span class="material-symbols-outlined">calendar_today</span><span>My Bookings</span>
+    </button>
+    <button onclick="showPage('menu')" class="sidebar-link w-full flex items-center gap-3 text-zinc-400 hover:text-zinc-100 px-4 py-3 hover:bg-emerald-500/10 transition-all">
+      <span class="material-symbols-outlined">wine_bar</span><span>The Cellar</span>
+    </button>
+    <button class="sidebar-link w-full flex items-center gap-3 text-zinc-400 hover:text-zinc-100 px-4 py-3 hover:bg-emerald-500/10 transition-all">
+      <span class="material-symbols-outlined">support_agent</span><span>Concierge</span>
+    </button>
+    <button onclick="showPage('auth')" class="sidebar-link w-full flex items-center gap-3 text-zinc-400 hover:text-zinc-100 px-4 py-3 hover:bg-emerald-500/10 transition-all">
+      <span class="material-symbols-outlined">settings</span><span>Settings</span>
+    </button>
+  </nav>
+  <div class="mt-auto">
+    <button onclick="showPage('reservations')" class="w-full py-4 px-6 bg-emerald-400 text-on-primary font-bold rounded-xl shadow-lg hover:brightness-110 active:scale-95 transition-all">
+      Reserve Private Suite
+    </button>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════════════ PAGE: HOME ═══════════════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+  <!-- Hero -->
+  <section class="relative h-screen min-h-[800px] flex items-center justify-center overflow-hidden">
+    <div class="absolute inset-0 z-0">
+      <img class="w-full h-full object-cover filter blur-[2px] brightness-50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCg715ieBxM4rA-TolD7LboYb92W0vmdReHVNVHOhh5ojMvnlA6L-DgLOg-CpO4kk9Kj-s6oC6MNrejKjPYccpi4esALk7_fp9EVpINAn_R6g4aCSoVvGCZbOUJ-Gs9w-ObeG6nEx4heNXFXddq6af-3v2pe2cuuAG4_7bV93gZpQG-pEmObeefSDmB_vd9Ylp-Mu8Esg8xPwHrHWofucSCiRXv4SXnFIpogqa1NPbinJaNEI8j5EL571kmHohZjjdhaJ2y-cV2GOAw" alt="Fine dining interior"/>
+      <div class="absolute inset-0 hero-gradient"></div>
+    </div>
+    <div class="relative z-10 text-center max-w-5xl px-6">
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-secondary-container text-on-secondary-container rounded-full text-xs font-bold mb-8 tracking-widest uppercase border border-primary/20">
+        <span class="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></span>Now Reserving for Autumn
+      </div>
+      <h1 class="font-headline text-5xl md:text-8xl font-bold tracking-tighter mb-6 text-on-surface leading-none">
+        Aethelgard: The Future of <span class="text-primary text-glow">Fine Dining</span>
+      </h1>
+      <p class="text-lg md:text-2xl text-on-surface-variant max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+        Experience a culinary journey powered by AI and curated for the soul. Where ancient craft meets digital precision.
+      </p>
+      <div class="flex flex-col md:flex-row items-center justify-center gap-6">
+        <button onclick="showPage('reservations')" class="w-full md:w-auto px-10 py-5 bg-primary text-on-primary rounded-xl font-bold text-lg tracking-tight button-glow hover:brightness-110 transition-all">
+          Book Table
+        </button>
+        <button onclick="showPage('menu')" class="group flex items-center gap-2 text-on-surface font-semibold text-lg hover:text-tertiary transition-colors">
+          Explore Menu <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+      <span class="material-symbols-outlined text-primary/40 text-4xl">expand_more</span>
+    </div>
+  </section>
+
+  <!-- AI Mood Section -->
+  <section class="py-24 bg-surface relative overflow-hidden">
+    <div class="max-w-screen-xl mx-auto px-8 relative z-10">
+      <div class="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
+        <div class="max-w-2xl">
+          <span class="text-tertiary font-headline font-bold tracking-widest uppercase text-sm block mb-4">Neural Gastronomy</span>
+          <h2 class="text-4xl md:text-6xl font-headline font-bold text-on-surface mb-6">What's your <span class="italic text-primary-fixed-dim">mood</span> today?</h2>
+          <p class="text-on-surface-variant text-lg">Our AI sommelier analyzes your current emotional resonance to curate the perfect flavor profile for your evening.</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div onclick="selectMood(this)" class="mood-card glass-panel group p-8 rounded-2xl cursor-pointer hover:bg-primary-container/40 transition-all duration-500 flex flex-col items-center text-center gap-6">
+          <div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center group-hover:bg-primary transition-colors duration-500">
+            <span class="material-symbols-outlined text-3xl group-hover:text-on-primary">bolt</span>
+          </div>
+          <h3 class="font-headline text-xl font-bold">Energetic</h3>
+          <p class="text-sm text-on-surface-variant opacity-60">Vibrant spices and high-altitude wines</p>
+        </div>
+        <div onclick="selectMood(this)" class="mood-card glass-panel group p-8 rounded-2xl cursor-pointer hover:bg-primary-container/40 transition-all duration-500 flex flex-col items-center text-center gap-6">
+          <div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center group-hover:bg-primary transition-colors duration-500">
+            <span class="material-symbols-outlined text-3xl group-hover:text-on-primary">self_improvement</span>
+          </div>
+          <h3 class="font-headline text-xl font-bold">Calm</h3>
+          <p class="text-sm text-on-surface-variant opacity-60">Oceanic textures and earthy infusions</p>
+        </div>
+        <div onclick="selectMood(this)" class="mood-card glass-panel group p-8 rounded-2xl cursor-pointer border-2 border-primary/50 bg-primary-container/20 transition-all duration-500 flex flex-col items-center text-center gap-6 relative overflow-hidden">
+          <div class="absolute top-0 right-0 bg-tertiary text-on-tertiary px-3 py-1 text-[10px] font-bold uppercase tracking-tighter">Recommended</div>
+          <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
+            <span class="material-symbols-outlined text-3xl text-on-primary" style="font-variation-settings:'FILL' 1;">favorite</span>
+          </div>
+          <h3 class="font-headline text-xl font-bold text-primary">Romantic</h3>
+          <p class="text-sm text-on-surface-variant">Velvety dark chocolate and vintage rose</p>
+        </div>
+        <div onclick="selectMood(this)" class="mood-card glass-panel group p-8 rounded-2xl cursor-pointer hover:bg-primary-container/40 transition-all duration-500 flex flex-col items-center text-center gap-6">
+          <div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center group-hover:bg-primary transition-colors duration-500">
+            <span class="material-symbols-outlined text-3xl group-hover:text-on-primary">explore</span>
+          </div>
+          <h3 class="font-headline text-xl font-bold">Adventurous</h3>
+          <p class="text-sm text-on-surface-variant opacity-60">Experimental ferments and rare game</p>
+        </div>
+      </div>
+      <div id="mood-result" class="mt-10 hidden">
+        <div class="glass-panel p-6 rounded-2xl border border-primary/30 flex items-center gap-6">
+          <span class="material-symbols-outlined text-4xl text-primary">auto_awesome</span>
+          <div>
+            <p class="text-tertiary font-bold text-sm uppercase tracking-widest mb-1">AI Recommendation</p>
+            <p class="text-on-surface text-lg" id="mood-text">Based on your mood, we recommend the <strong class="text-primary">Midnight Wagyu Reserve</strong> paired with our 2018 Barolo.</p>
+          </div>
+          <button onclick="showPage('menu')" class="ml-auto px-6 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm hover:brightness-110 transition-all whitespace-nowrap">View Menu</button>
+        </div>
+      </div>
+    </div>
+    <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -mr-64 -mt-64"></div>
+  </section>
+
+  <!-- Experiences / Bento Grid -->
+  <section id="experiences" class="py-24 bg-surface-container-lowest">
+    <div class="max-w-screen-2xl mx-auto px-8">
+      <h2 class="text-4xl md:text-5xl font-headline font-bold text-on-surface mb-16 text-center">Curated <span class="text-tertiary">Experiences</span></h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="md:col-span-2 glass-panel rounded-3xl overflow-hidden group h-[500px] relative">
+          <img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBllmoXpUwBoc52n6skQa5IX1CrJgc2kGE2JxekE0r9oauS2Qxcvu_35XMe2Ut8z9EJ532hb91OWYQ4sZSKQFMi51GG_MFGuGufdC1ZPIZvBYMGA3mgEP4StZymefLg9TlG20OeL4A9POeSIjykpdzycou81Pgh3NxVh72OcLG4c8OeVd7a2ak2VLxl5Q0yXjEjRxwzAmI0mr0pxW27Ck-uGFtVp0h_eay_e5SaQXredUVcR9nAZWhZUmU0FRLmeLEcSfWIL919agzd" alt="Wine tasting"/>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-12 flex flex-col justify-end">
+            <span class="text-tertiary font-bold tracking-widest text-xs uppercase mb-4">Every Tuesday</span>
+            <h3 class="text-4xl font-headline font-bold text-on-surface mb-4">Wine Tasting Masterclass</h3>
+            <p class="text-on-surface-variant max-w-lg mb-8 leading-relaxed">Journey through the rarest vintages in our subterranean cellar, guided by our world-class AI-assisted sommeliers.</p>
+            <button onclick="showPage('reservations')" class="w-fit px-8 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl font-bold hover:bg-primary hover:text-on-primary transition-all">Reserve Experience</button>
+          </div>
+        </div>
+        <div class="glass-panel rounded-3xl overflow-hidden group h-[500px] relative">
+          <img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAy_qNM2wSBGjsCj8O0wjvrFvheEQfBXcsU2rubNdtkHgxKOOZX-3LaQg4qwsQSyfCLh61igB35nTyDpT8B6e99Ms0jREqFJEYPxpnKLaZ3dKGHnuPK6Xz7Cb-Nw6NANfpkdRAxpZfhXaEMIULz7pQuhP020_Xz7anEgnvi2Wv2FWUIWbraitOkvu4T1kLVNFFTJE3qCbkhUpCAnuJCVIWmvgkaUrnXQ_6tn9SyOIPvp0hcqTgr8uW6ANesI519nClMHEByJ4KDGhz" alt="Chef's table"/>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-8 flex flex-col justify-end">
+            <h3 class="text-2xl font-headline font-bold text-on-surface mb-3">Chef's Table</h3>
+            <p class="text-sm text-on-surface-variant mb-6">An intimate 12-course narrative of culinary evolution.</p>
+            <button onclick="showPage('reservations')" class="w-full py-3 border border-primary/40 text-primary font-bold rounded-xl group-hover:bg-primary group-hover:text-on-primary transition-all">Book Seat</button>
+          </div>
+        </div>
+        <div id="cellar" class="md:col-span-3 glass-panel rounded-3xl overflow-hidden group h-[350px] relative">
+          <img class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 brightness-50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdg1Y477snnFlr3WqftZooHhUhFmrS8NuCee--0e18lG-wqDyKfEFtbnUzLIfi8a9El7AYmHBkKyzcHmmDprnqFI7rxX7nBVoFL1CjUGRWYNhpkUMofXsmKKgETRoRQ3MsvNFCaQaTivmd_F9hp8H4I6SDJDtB52SPXzs0pXo731-vGGU2wEKqx-8dJGqRnr0wdEaGUJXumyJtJjj2" alt="Jazz lounge"/>
+          <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/20 to-transparent p-12 flex flex-col justify-center">
+            <h3 class="text-4xl font-headline font-bold text-on-surface mb-4">Midnight Jazz</h3>
+            <p class="text-on-surface-variant max-w-md leading-relaxed mb-6">Live acoustic performances meet generative soundscapes for a sensory dinner experience like no other.</p>
+            <div class="flex gap-4">
+              <span class="px-4 py-2 bg-secondary-container rounded-full text-xs font-bold text-on-secondary-container">FRI & SAT ONLY</span>
+              <span class="px-4 py-2 bg-primary-container rounded-full text-xs font-bold text-on-primary-container">LIMITED SLOTS</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="py-24 bg-surface relative overflow-hidden">
+    <div class="max-w-screen-xl mx-auto px-8 relative z-10">
+      <div class="text-center mb-20">
+        <h2 class="text-3xl font-headline font-bold tracking-tight mb-2">The Critical Eye</h2>
+        <div class="w-24 h-1 bg-tertiary mx-auto"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div class="relative pt-12">
+          <span class="material-symbols-outlined absolute top-0 left-0 text-6xl text-primary/20">format_quote</span>
+          <p class="text-xl font-light italic mb-8 leading-relaxed text-on-surface-variant">"Aethelgard isn't just a restaurant; it's a profound exploration of what happens when machine intelligence understands the human palate better than we do ourselves."</p>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-surface-container-high border border-primary/30 flex items-center justify-center font-headline font-bold text-primary">MS</div>
+            <div><h4 class="font-bold text-on-surface">Marcus Sterling</h4><p class="text-xs text-on-surface-variant uppercase tracking-widest">Global Gastronomy Critic</p></div>
+          </div>
+        </div>
+        <div class="relative pt-12 scale-110 z-20">
+          <div class="glass-panel p-8 rounded-2xl border-primary/20 shadow-2xl">
+            <span class="material-symbols-outlined absolute -top-4 left-8 text-6xl text-tertiary/40">format_quote</span>
+            <p class="text-xl font-light italic mb-8 leading-relaxed text-on-surface">"The seamless integration of AI mood-mapping with high-end culinary craft creates an experience that is both technologically awe-inspiring and deeply soulful."</p>
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-full bg-surface-container-high border border-tertiary/30 flex items-center justify-center font-headline font-bold text-tertiary">EC</div>
+              <div><h4 class="font-bold text-on-surface">Elena Cross</h4><p class="text-xs text-on-surface-variant uppercase tracking-widest">Editor, The Luxe Journal</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="relative pt-12">
+          <span class="material-symbols-outlined absolute top-0 left-0 text-6xl text-primary/20">format_quote</span>
+          <p class="text-xl font-light italic mb-8 leading-relaxed text-on-surface-variant">"The wine selection process alone is worth the flight to the city. My AI recommendation was a vintage I never would have picked, but was exactly what my soul needed."</p>
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-surface-container-high border border-primary/30 flex items-center justify-center font-headline font-bold text-primary">JW</div>
+            <div><h4 class="font-bold text-on-surface">Julian Weaver</h4><p class="text-xs text-on-surface-variant uppercase tracking-widest">Sommelier Elite</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px]"></div>
+  </section>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ PAGE: MENU ═══════════════════════════════════════════════════ -->
+<div id="page-menu" class="page">
+  <main class="pt-28 pb-20 px-6 max-w-screen-2xl mx-auto">
+    <header class="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <div class="max-w-2xl">
+        <span class="font-label text-tertiary tracking-widest uppercase text-xs mb-4 block">Gastronomic Curations</span>
+        <h1 class="font-headline text-5xl md:text-7xl font-bold tracking-tighter mb-6 leading-none">The Alchemy of <span class="text-primary">Flavour.</span></h1>
+        <p class="text-on-surface-variant text-lg max-w-lg">Experience a symphony of seasonal harvests, precision-crafted by our master chefs into an editorial culinary journey.</p>
+      </div>
+      <div class="glass-card p-6 rounded-xl border border-outline-variant/20 flex gap-6 items-center max-w-sm">
+        <div class="relative">
+          <div class="w-16 h-16 rounded-full overflow-hidden bg-primary-container flex items-center justify-center text-primary font-bold text-xl">🍹</div>
+          <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-tertiary rounded-full flex items-center justify-center text-on-tertiary shadow-lg">
+            <span class="material-symbols-outlined text-[14px]" style="font-variation-settings:'FILL' 1;">auto_awesome</span>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-headline font-bold text-sm text-tertiary uppercase tracking-widest">Mood Recommendation</h4>
+          <p class="text-on-surface text-sm mt-1">Feeling adventurous? Try the <span class="font-bold">Ethereal Moss</span> cocktail.</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Category Filter -->
+    <section class="mb-12">
+      <div class="flex flex-wrap gap-4 items-center">
+        <button onclick="filterMenu('all',this)" class="category-btn active px-8 py-3 bg-primary text-on-primary font-bold rounded-full transition-all">All Collections</button>
+        <button onclick="filterMenu('starter',this)" class="category-btn px-8 py-3 bg-secondary-container text-on-secondary-container hover:bg-primary/20 transition-all rounded-full font-medium">Starters</button>
+        <button onclick="filterMenu('main',this)" class="category-btn px-8 py-3 bg-secondary-container text-on-secondary-container hover:bg-primary/20 transition-all rounded-full font-medium">Mains</button>
+        <button onclick="filterMenu('dessert',this)" class="category-btn px-8 py-3 bg-secondary-container text-on-secondary-container hover:bg-primary/20 transition-all rounded-full font-medium">Desserts</button>
+        <button onclick="filterMenu('cocktail',this)" class="category-btn px-8 py-3 bg-secondary-container text-on-secondary-container hover:bg-primary/20 transition-all rounded-full font-medium">Cocktails</button>
+        <button onclick="filterMenu('juice',this)" class="category-btn px-8 py-3 bg-secondary-container text-on-secondary-container hover:bg-primary/20 transition-all rounded-full font-medium">Juices</button>
+      </div>
+    </section>
+
+    <!-- Menu Grid -->
+    <div id="menu-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+      <!-- STARTERS -->
+      <div data-category="starter" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBo0SEAQ0k5U9ELv0mrwVWh2osYpylkE8QjMv88Egx-fUDrt4eeXqr22NAb5QC6Kcr6Ea7Qhqo0qAPU_66J-VTbxGSGPO8qj5TQNPeSGVjWnRWcOICMiETls4xWdJF_cXpV5-tF4TsYoANHegXXTqO_YH-5To1QVW1BK3XniuH_mrH2eKLkEaj7vhmP58Ct8ZNhywIyidRvCuE5usEZ98Odjz7qikL2OV_L0tJq0nOYdiiORTGuOwxZziUXm0mrN-LhFBRWsWxMtnkO" alt="Verdant Harvest"/>
+          <div class="absolute top-4 left-4 flex gap-2">
+            <span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-tertiary border border-tertiary/30">Vegan</span>
+            <span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-primary border border-primary/30">Signature</span>
+          </div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Verdant Harvest</h3><span class="text-tertiary font-headline font-bold text-xl">$24</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Heirloom greens with fermented cucumber emulsion, charcoal-infused pine nuts, and edible violas.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <div data-category="starter" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <div class="w-full h-full bg-gradient-to-br from-emerald-900 to-surface-container-highest flex items-center justify-center text-8xl">🦪</div>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-primary border border-primary/30">Premium</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Oyster Noir</h3><span class="text-tertiary font-headline font-bold text-xl">$32</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Pacific oysters with squid ink mignonette, smoked caviar pearls, and yuzu foam.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <div data-category="starter" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <div class="w-full h-full bg-gradient-to-br from-amber-900/40 to-surface-container-highest flex items-center justify-center text-8xl">🥗</div>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-tertiary border border-tertiary/30">Vegetarian</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Saffron Bisque</h3><span class="text-tertiary font-headline font-bold text-xl">$19</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Roasted heirloom tomato with saffron threads, Gruyère croutons, and micro-basil oil.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <!-- MAINS -->
+      <div data-category="main" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcy2_av4XkeZ-iBbSOpBUcvyyXu2Lra53ZAIvMMhtfczzTN-PkKHFXnPeIyfgiW1A95bVYyNrnOyz8nTm00zmp2MzS9aHguwd7tf4Zh9-RMLQT1z-BWZQtFCq2PKC9YfI1YDfqUgsSrDA4mvBy1R5G_B7U1Zb9fYL23u5j3FUbISx9ENDdWt3gGv0sKsEhiHo8Zj0dZ192VQ8rnLizD6WE1q4EJhlOuzU-pMkvqimiJ9CiIuyWq4Wa9T9j5GfUCHvIurVuwb4rqDbK" alt="Wagyu"/>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-tertiary border border-tertiary/30">Gluten-Free</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Aethelgard Prime</h3><span class="text-tertiary font-headline font-bold text-xl">$85</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Aged Wagyu sirloin over smoked celeriac purée with marrow-infused reduction and sea salt flakes.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <div data-category="main" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSCrVHKNXX52hn8Q5HSFNymQNF738woeHBqUJRRmcaMd5Plw9t328QrdDuiSxlBLZN3cwKjtiyW4tk7YXL1j2glTI4wLWRe0v_h1tQZ6WWC877-8-ngbDiTQQuSa6WyMIvt8HqvJtyLCaEkxRjJYLbXNBAHnQ6fIw7BJCKxD8OXO5iF5Fz5faMqg6ZO6h4mPLx_Xtxg-UhnXI1y4fqu8NMPYGQqwpzI7IiCvOyC7dW6cs0i6SUhdDO0RJYU8gLywfi5AgnOrRhkOsl" alt="Truffle Nexus"/>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-tertiary border border-tertiary/30">Vegetarian</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Truffle Nexus</h3><span class="text-tertiary font-headline font-bold text-xl">$42</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Hand-cut tagliatelle, 36-month aged parmesan foam, and shaved Périgord black truffles.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <div data-category="main" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTXewBTvil-iF0RAu0HU75QHnFSKuPiTB7pU-8cGPxrYgxZIpWUq-0pNfqJvXBZH5nCRTExg6GBh18cQNHWKK6sXPk5c3jse9nrq3Q5OM-GHzLK1VwO23IbMreNo_hroGmQhr0aWguvWFqJ4s8Ysg-MgjAbFR48kyIa4mOiTb6odoa-oluyuSw9_XG8QTrmU7ufWngPSVkc1UM8keJVf2lve1S6Px8PuTPwkrvgUrIlnqPMcVQQai0aV" alt="Solaris Salmon"/>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-tertiary border border-tertiary/30">Gluten-Free</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Solaris Salmon</h3><span class="text-tertiary font-headline font-bold text-xl">$38</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Wild-caught king salmon, citrus-infused oils, charred heirloom asparagus, and saffron air.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <div data-category="main" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <div class="w-full h-full bg-gradient-to-br from-blue-900/40 to-surface-container-highest flex items-center justify-center text-8xl">🦞</div>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-primary border border-primary/30">Chef's Choice</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Celestial Lobster</h3><span class="text-tertiary font-headline font-bold text-xl">$110</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Butter-poached Maine lobster, saffron bisque, and micro-garden herbs with edible gold leaf.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <!-- DESSERTS -->
+      <div data-category="dessert" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdJe9_91dwVsk8ky6lwbcxpPlIn1KeEgC6z9L7a7uhnhi0NgG9lyL1y3JstfJGTQP-vOlv2Ar0fK1q6WsZVTrwvkyy1jDOds6bkPGtAdypmxwb7B3M24kYmHPVLBZ4QG_TOK4-KQDWmqZxMJNklPgIhfRsjleqtNdiTjJ7ydMF_tov4flfEu4U9c6qYD22yOT3cUzGsVGR18AN4pobDYGiyUMjGbkB920TuejLDoOB_9GyQyDKpDkEgpNEVsw0JAigY0dSeMKR8Hj_" alt="Midnight Ganache"/>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-tertiary border border-tertiary/30">Chef's Choice</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Midnight Ganache</h3><span class="text-tertiary font-headline font-bold text-xl">$18</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">70% dark single-origin chocolate Sphere, tempered gold shards, and a core of liquid black cherry.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <div data-category="dessert" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <div class="w-full h-full bg-gradient-to-br from-purple-900/40 to-surface-container-highest flex items-center justify-center text-8xl">🍮</div>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-tertiary border border-tertiary/30">Signature</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Violet Crème Brûlée</h3><span class="text-tertiary font-headline font-bold text-xl">$16</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Earl Grey-infused custard, caramelised violet sugar crust, and candied lavender blooms.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <div data-category="dessert" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <div class="w-full h-full bg-gradient-to-br from-yellow-900/30 to-surface-container-highest flex items-center justify-center text-8xl">🍦</div>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-primary border border-primary/30">Gluten-Free</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Gold Saffron Sorbet</h3><span class="text-tertiary font-headline font-bold text-xl">$14</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Iranian saffron sorbet with rose water mist, pistachio dust, and honey comb shards.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <!-- COCKTAILS -->
+      <div data-category="cocktail" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCn5-e2sX8c03HFelOY-yYSRRFG9ivPFGD5lsP8UufkPtUvV17ZA7UHTWXa7SvTPCIUmep38eVQ_10g9Il2gF77wTQhjnN91_3NVEsT23_hKjMZ9p2qk7wfcrdmIVBBMeuelth-qhanRhWapbcVv_IqVFUOF3M9Bj2Bmo8CWZkzlzotuWXpsx3SO8Nh9IUHuyEc6-3FT755k46rgDejoaa7579fhCc29-YrTIJqYeQ29NcvGp1W7WryNViKlhG_qcVOk6nC1NJruN6J" alt="Obsidian Martini"/>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-primary border border-primary/30">Cocktail</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Obsidian Martini</h3><span class="text-tertiary font-headline font-bold text-xl">$22</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Small-batch botanicals, dry vermouth mist, and a singular cold-pressed obsidian olive.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <div data-category="cocktail" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlRoU8C_enIH6sjG3sAVxTn13IJ_Wy7msJJnnK4YmHBkKyzcHmmDprnqFI7rxX7nBVoFL1CjUGRWYNhpkUMofXsmKKgETRoRQ3MsvNFCaQaTivmd_F9hp8H4I6SDJDtB52SPXzs0pXo731-vGGU2wEKqx-waSQ8lCHwC70VWNqonOQFsdTWHnQy1Kwhkoo0Cfq-KNTLZVnlK0z__9qNmmwzDIqxUlhafi4lsENB96rCIJvJMV79p_nQdeOiv_cnnm9h5g9-XkBkx_Z" alt="Emerald Aether"/>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-primary border border-primary/30">Signature</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">The Emerald Aether</h3><span class="text-tertiary font-headline font-bold text-xl">$26</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Smoked botanical gin, rare elderflower nectar, velvet basil syrup, and liquid nitrogen mist.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <div data-category="cocktail" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <div class="w-full h-full bg-gradient-to-br from-rose-900/40 to-surface-container-highest flex items-center justify-center text-8xl">🍸</div>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-tertiary border border-tertiary/30">Limited</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Crimson Solstice</h3><span class="text-tertiary font-headline font-bold text-xl">$28</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Aged Japanese whisky, blood orange reduction, activated charcoal bitters, and rose gold dust.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <div data-category="cocktail" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgsGbYORhtkOi8--ZD8cbcoITN1igEH2gzMON4e2Ss9B7QRqTiBfROxCk2k3YQezZGBbEYo9XhjzzdFZcliRzHv_C5QL0b4VLWe5f18uMNOQD4FLOzZfBFJlXXnxZGlj82Ds3NhbHoMLmEhhn853xSzlekfi4WLIqS1xM2JeC_yPOCEdVm-uHHOp7hnubP3t6CXwjzpmA7rvT2bijjaQW0mNz8cVwgOfD6EApHxZMfpZ9P498u2aqwtweAaCvAnKb9BckohDepKkr2" alt="Ethereal Moss"/>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-primary border border-primary/30">AI Pick</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Ethereal Moss</h3><span class="text-tertiary font-headline font-bold text-xl">$24</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Matcha-infused vodka, cucumber soda, spirulina foam, and edible flower garnish.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Dish</button>
+        </div>
+      </div>
+
+      <!-- JUICES -->
+      <div data-category="juice" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <div class="w-full h-full bg-gradient-to-br from-green-800/50 to-surface-container-highest flex items-center justify-center text-8xl">🥤</div>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-primary border border-primary/30">Organic</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Chlorophyll Elixir</h3><span class="text-tertiary font-headline font-bold text-xl">$12</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Cold-pressed spinach, green apple, ginger root, and activated chlorophyll with lemon zest.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Drink</button>
+        </div>
+      </div>
+
+      <div data-category="juice" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <div class="w-full h-full bg-gradient-to-br from-orange-800/40 to-surface-container-highest flex items-center justify-center text-8xl">🧃</div>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-tertiary border border-tertiary/30">Seasonal</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Solstice Citrus</h3><span class="text-tertiary font-headline font-bold text-xl">$10</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Blood orange, Sicilian lemon, pink grapefruit with Persian turmeric and black pepper tincture.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Drink</button>
+        </div>
+      </div>
+
+      <div data-category="juice" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <div class="w-full h-full bg-gradient-to-br from-purple-800/40 to-surface-container-highest flex items-center justify-center text-8xl">🍇</div>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-primary border border-primary/30">Non-Alcoholic</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Obsidian Berry</h3><span class="text-tertiary font-headline font-bold text-xl">$11</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Wild blueberry, blackcurrant, acai, and hibiscus water with activated charcoal and mint oil.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Drink</button>
+        </div>
+      </div>
+
+      <div data-category="juice" class="menu-item group relative glass-card p-4 rounded-xl transition-all duration-500 hover:-translate-y-2 hover:bg-white/5">
+        <div class="aspect-[4/3] rounded-xl overflow-hidden mb-6 relative">
+          <div class="w-full h-full bg-gradient-to-br from-yellow-700/30 to-surface-container-highest flex items-center justify-center text-8xl">🥭</div>
+          <div class="absolute top-4 left-4"><span class="px-3 py-1 bg-surface-container-highest/80 backdrop-blur-md text-[10px] font-bold uppercase tracking-widest rounded-full text-tertiary border border-tertiary/30">Tropical</span></div>
+        </div>
+        <div class="px-2 pb-2">
+          <div class="flex justify-between items-start mb-2"><h3 class="font-headline text-2xl font-bold tracking-tight">Saffron Tropique</h3><span class="text-tertiary font-headline font-bold text-xl">$13</span></div>
+          <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Alphonso mango, passion fruit, coconut water, saffron threads, and Persian rosewater.</p>
+          <button onclick="showPage('reservations')" class="w-full py-3 border border-outline-variant/30 rounded-xl text-sm font-bold tracking-widest uppercase hover:bg-primary hover:text-on-primary transition-all duration-300">Reserve Drink</button>
+        </div>
+      </div>
+
+      <!-- Private Cellar Feature Card (always visible) -->
+      <div data-category="all" class="menu-item md:col-span-2 lg:col-span-3 group relative glass-card rounded-2xl overflow-hidden h-[350px] relative">
+        <div class="absolute inset-0 z-0">
+          <img class="w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-1000" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDgJ-ejYDYnOy3D1mmHpER55yez9Rpwk3AECVfHOGR95mhhGLsYiqylsTh29y34MGd1kePwJt8GtNzDvGmqXb86zKWfqDzKHMtTRxIlaP586a7m7y8xU1qpqzfSE_FNInXsk2kvLPCpBqDQkk05iPqhbkWBDx5AZGXgQ2lHUnkTQNWRMdFy9Y6P_vpq-50w83WQNYzAqa0TaFj7rsoLzaJU6rp_sIxl7kGijtVcW9whbkU1xlMNFDxoaTIRJUydxkcoOLHrDZztpUCF" alt="Private Cellar"/>
+          <div class="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent"></div>
+        </div>
+        <div class="relative z-10 max-w-xl p-12 flex flex-col justify-center h-full">
+          <span class="font-label text-primary tracking-widest uppercase text-xs mb-4 block">The Alchemist's Chamber</span>
+          <h2 class="font-headline text-4xl md:text-5xl font-bold tracking-tight mb-6">Private Cellar Tasting</h2>
+          <p class="text-on-surface-variant text-lg mb-8">Access our vault of vintage vintages and bespoke infusions. A curated sensory experience for groups of up to six.</p>
+          <button onclick="showPage('reservations')" class="w-fit px-10 py-4 bg-tertiary text-on-tertiary font-bold rounded-xl shadow-xl shadow-tertiary/10 hover:brightness-110 transition-all">Inquire for Access</button>
+        </div>
+      </div>
+
+    </div><!-- end menu-grid -->
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ PAGE: RESERVATIONS ═══════════════════════════════════════════════════ -->
+<div id="page-reservations" class="page">
+  <main class="min-h-screen pt-24 pb-12 spotlight flex items-center justify-center px-4 relative overflow-hidden">
+    <div class="absolute top-1/4 -left-20 w-96 h-96 bg-primary/5 rounded-full blur-[120px]"></div>
+    <div class="absolute bottom-1/4 -right-20 w-96 h-96 bg-tertiary/5 rounded-full blur-[120px]"></div>
+    <div class="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-12 gap-0 shadow-[0_20px_40px_rgba(0,0,0,0.6)] rounded-xl overflow-hidden glass-panel">
+      <div class="lg:col-span-5 relative hidden lg:block overflow-hidden">
+        <img class="absolute inset-0 w-full h-full object-cover grayscale-[0.2] brightness-75" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdXkyN7hcBUFLmZheDfkG4XuQAtkZvVoCiiLEkz8dIncuRClW7Olg-eQ5DzyOyWpO9xhaXhZgKOjLI60CZ0-Y5VUc0X_Q-hHuV52c_-y9FPNk8TdkZpfs68ew_DHjsbPjDklXKTKexYamGq0eRwIIL8x-PuEMdgEBBNGVPWzdcGm85E9FUXu8t9t_PPOyR2W_yRcSNQKFfshWp1Mg7c0oSlBUbe803bVzVJhaB3b0tnHjTtzKdDttpMKydo5UGj_0jSLcVbDf-cA1g" alt="Restaurant interior"/>
+        <div class="absolute inset-0 bg-gradient-to-t from-surface via-transparent to-transparent"></div>
+        <div class="absolute bottom-8 left-8 right-8">
+          <span class="text-tertiary text-xs font-bold uppercase tracking-[0.2em] mb-2 block">Exclusive Access</span>
+          <h2 class="text-3xl font-headline font-bold text-on-surface leading-tight mb-4">The Zenith of Gastronomy</h2>
+          <p class="text-on-surface-variant text-sm leading-relaxed">Secure your place at our table where every flavor tells a story of heritage and innovation.</p>
+        </div>
+      </div>
+      <div class="lg:col-span-7 p-8 md:p-12 flex flex-col justify-center">
+        <div class="mb-8">
+          <h1 class="text-4xl font-headline font-bold tracking-tighter mb-2">Reservations</h1>
+          <p class="text-on-surface-variant">Select your preferred journey through our culinary landscape.</p>
+        </div>
+        <form class="space-y-6" onsubmit="handleReservation(event)">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-tertiary uppercase tracking-wider">Date of Experience</label>
+              <div class="relative">
+                <span class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 text-primary">calendar_today</span>
+                <input type="date" class="w-full bg-transparent border-b border-outline/30 focus:border-primary focus:ring-0 text-on-surface pl-8 py-2 transition-all outline-none font-body"/>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-tertiary uppercase tracking-wider">Guest Count</label>
+              <div class="relative">
+                <span class="material-symbols-outlined absolute left-0 top-1/2 -translate-y-1/2 text-primary">group</span>
+                <select class="w-full bg-transparent border-b border-outline/30 focus:border-primary focus:ring-0 text-on-surface pl-8 py-2 transition-all outline-none font-body appearance-none">
+                  <option class="bg-surface">2 Guests</option>
+                  <option class="bg-surface">4 Guests</option>
+                  <option class="bg-surface">6 Guests</option>
+                  <option class="bg-surface">Private Vault (8+)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-bold text-tertiary uppercase tracking-wider">Preferred Time Selection</label>
+              <div class="flex gap-4">
+                <span class="text-xs flex items-center gap-1 text-on-surface-variant"><span class="w-2 h-2 rounded-full bg-primary inline-block"></span>Available</span>
+                <span class="text-xs flex items-center gap-1 text-on-surface-variant/40"><span class="w-2 h-2 rounded-full bg-surface-container-highest inline-block"></span>Limited</span>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="p-4 rounded-xl bg-surface-container-high border border-outline-variant/10 hover:border-primary/50 transition-all cursor-pointer">
+                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold font-headline">Evening</span><span class="material-symbols-outlined text-primary text-sm">nights_stay</span></div>
+                <div class="flex flex-wrap gap-2">
+                  <span onclick="selectTime(this)" class="time-slot px-2 py-1 text-[10px] bg-primary/20 text-primary rounded border border-primary/20 cursor-pointer hover:bg-primary/30">19:00</span>
+                  <span onclick="selectTime(this)" class="time-slot px-2 py-1 text-[10px] bg-primary/20 text-primary rounded border border-primary/20 cursor-pointer hover:bg-primary/30">20:30</span>
+                  <span class="px-2 py-1 text-[10px] bg-surface/40 text-on-surface-variant/40 rounded border border-outline-variant/10 cursor-not-allowed">21:45</span>
+                </div>
+              </div>
+              <div class="p-4 rounded-xl bg-surface-container-high border border-outline-variant/10 hover:border-primary/50 transition-all cursor-pointer">
+                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold font-headline">Brunch</span><span class="material-symbols-outlined text-tertiary text-sm">wb_sunny</span></div>
+                <div class="flex flex-wrap gap-2">
+                  <span onclick="selectTime(this)" class="time-slot px-2 py-1 text-[10px] bg-primary/20 text-primary rounded border border-primary/20 cursor-pointer hover:bg-primary/30">11:00</span>
+                  <span onclick="selectTime(this)" class="time-slot px-2 py-1 text-[10px] bg-primary/20 text-primary rounded border border-primary/20 cursor-pointer hover:bg-primary/30">12:30</span>
+                  <span onclick="selectTime(this)" class="time-slot px-2 py-1 text-[10px] bg-primary/20 text-primary rounded border border-primary/20 cursor-pointer hover:bg-primary/30">14:00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-tertiary uppercase tracking-wider">Special Requests & Dietary Requirements</label>
+            <textarea class="w-full bg-surface-container-lowest border border-outline-variant/20 focus:border-primary focus:ring-0 text-on-surface p-4 rounded-xl transition-all outline-none font-body text-sm placeholder:text-on-surface-variant/30" placeholder="Tell us how we can make your evening exceptional..." rows="3"></textarea>
+          </div>
+          <div class="pt-4">
+            <button type="submit" class="w-full py-4 bg-tertiary text-on-tertiary-fixed font-headline font-bold text-lg rounded-xl gold-glow hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group">
+              Confirm Reservation <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </button>
+            <p class="text-center text-[10px] text-on-surface-variant/50 mt-4 uppercase tracking-[0.2em]">By confirming, you agree to our 24h cancellation policy.</p>
+          </div>
+        </form>
+        <!-- Success Message -->
+        <div id="reservation-success" class="hidden mt-6 p-6 bg-primary-container/40 border border-primary/30 rounded-xl text-center">
+          <span class="material-symbols-outlined text-5xl text-primary" style="font-variation-settings:'FILL' 1;">check_circle</span>
+          <h3 class="font-headline text-2xl font-bold text-primary mt-3 mb-2">Reservation Confirmed!</h3>
+          <p class="text-on-surface-variant">We look forward to welcoming you. A confirmation has been sent to your email.</p>
+          <button onclick="showPage('dashboard')" class="mt-6 px-8 py-3 bg-primary text-on-primary rounded-xl font-bold hover:brightness-110 transition-all">View Dashboard</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ PAGE: DASHBOARD ═══════════════════════════════════════════════════ -->
+<div id="page-dashboard" class="page">
+  <main class="min-h-screen" style="background-image: radial-gradient(circle at 50% 0%, #002e1d 0%, #131313 70%);">
+    <!-- Dashboard Header -->
+    <div class="pt-28 px-8 pb-12 max-w-screen-2xl mx-auto space-y-12">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="md:col-span-2 glass-panel p-8 rounded-xl flex items-end justify-between overflow-hidden relative group">
+          <div class="absolute top-0 right-0 p-8 opacity-10"><span class="material-symbols-outlined text-9xl">workspace_premium</span></div>
+          <div class="relative z-10 space-y-2">
+            <span class="text-tertiary bg-tertiary-container/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Premium Status</span>
+            <h2 class="font-headline text-5xl font-bold tracking-tighter text-on-surface leading-none">Welcome back, Julian</h2>
+            <p class="text-on-surface-variant max-w-md">Your Gold Tier membership grants you access to the 1945 reserve tasting tonight.</p>
+          </div>
+          <div class="relative z-10 text-right">
+            <p class="text-3xl font-headline font-bold text-tertiary">24,850</p>
+            <p class="text-xs text-outline uppercase tracking-tighter">Aethel Points</p>
+          </div>
+        </div>
+        <div class="glass-panel p-8 rounded-xl flex flex-col justify-between">
+          <div class="flex justify-between items-start">
+            <span class="material-symbols-outlined text-primary text-4xl">account_balance_wallet</span>
+            <span class="text-xs text-primary font-bold">+12.5%</span>
+          </div>
+          <div>
+            <p class="text-on-surface-variant text-sm">Active Vault Credit</p>
+            <p class="text-3xl font-headline font-bold text-on-surface">$4,250.00</p>
+          </div>
+          <button class="mt-4 text-primary text-sm font-bold flex items-center hover:gap-2 transition-all">Top Up Balance <span class="material-symbols-outlined text-sm ml-1">arrow_forward</span></button>
+        </div>
+      </div>
+
+      <!-- Upcoming Reservations -->
+      <div class="space-y-6">
+        <div class="flex justify-between items-end">
+          <h3 class="font-headline text-2xl font-bold text-on-surface">Upcoming Reservations</h3>
+          <button onclick="showPage('reservations')" class="text-primary text-sm font-medium hover:underline">+ New Booking</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="glass-panel p-6 rounded-xl space-y-4 border-l-4 border-l-primary emerald-glow relative overflow-hidden">
+            <div class="flex justify-between items-start">
+              <div><p class="text-xs text-primary font-bold uppercase tracking-widest mb-1">Confirmed</p><h4 class="font-headline text-xl font-bold">The Obsidian Table</h4></div>
+              <span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+            </div>
+            <div class="flex items-center gap-4 text-sm text-on-surface-variant">
+              <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_month</span>Oct 24, 2024</div>
+              <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span>20:00</div>
+            </div>
+            <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+              <p class="text-xs text-outline">4 Guests • Private Dining</p>
+              <button class="text-on-surface hover:text-primary transition-colors"><span class="material-symbols-outlined">qr_code_2</span></button>
+            </div>
+          </div>
+          <div class="glass-panel p-6 rounded-xl space-y-4 border-l-4 border-l-tertiary relative overflow-hidden">
+            <div class="flex justify-between items-start">
+              <div><p class="text-xs text-tertiary font-bold uppercase tracking-widest mb-1">Pending</p><h4 class="font-headline text-xl font-bold">Vintage Cellar Tour</h4></div>
+              <span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+            </div>
+            <div class="flex items-center gap-4 text-sm text-on-surface-variant">
+              <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_month</span>Oct 28, 2024</div>
+              <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span>16:30</div>
+            </div>
+            <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+              <p class="text-xs text-outline">2 Guests • Guided Experience</p>
+              <button class="text-on-surface hover:text-primary transition-colors"><span class="material-symbols-outlined">edit</span></button>
+            </div>
+          </div>
+          <div class="glass-panel p-6 rounded-xl space-y-4 border-l-4 border-l-outline-variant relative overflow-hidden opacity-80">
+            <div class="flex justify-between items-start">
+              <div><p class="text-xs text-outline font-bold uppercase tracking-widest mb-1">Past</p><h4 class="font-headline text-xl font-bold">Sunset Lounge</h4></div>
+              <span class="material-symbols-outlined text-on-surface-variant">more_vert</span>
+            </div>
+            <div class="flex items-center gap-4 text-sm text-on-surface-variant">
+              <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_month</span>Oct 15, 2024</div>
+              <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span>18:00</div>
+            </div>
+            <div class="pt-4 border-t border-white/5 flex items-center justify-between">
+              <p class="text-xs text-outline">2 Guests • Seasonal Cocktails</p>
+              <button onclick="showPage('reservations')" class="text-primary text-xs font-bold uppercase">Rebook</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Curated Favorites -->
+      <div class="space-y-6">
+        <h3 class="font-headline text-2xl font-bold text-on-surface">Curated Favorites</h3>
+        <div class="flex gap-6 overflow-x-auto pb-6 no-scrollbar snap-x">
+          <div class="snap-start min-w-[300px] glass-panel rounded-xl overflow-hidden group">
+            <div class="h-48 w-full relative">
+              <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOKPzATnnqjWHjnuADdHGRXggZ8yw0hMPykUBK2lDUtguMBCDQFQzmqKMi2xSIvZcyOSeOhyzLD77e91KnUtfWrOJrrPg7J8R8X-icgs5WutI4FJ5vt8EpZtxGaNG5-k7hPT2LWQ3-wC5ivqwQmU0Mb86aBcQyw_Gydd4FplAdAop2RzkRL6fVMx5uZeLUTqXpbR5Pn9VEWF36CVqi6ZS5fw0RaGoUSnjoThQDICEfkBjww3D1t9iS2FXAX4HDSeNoeKRigdOGGctJ" alt="Wagyu"/>
+              <div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent"></div>
+              <button class="absolute top-4 right-4 bg-surface/80 p-2 rounded-full text-tertiary"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">favorite</span></button>
+            </div>
+            <div class="p-5 space-y-1">
+              <p class="text-xs text-tertiary font-bold uppercase">Chef's Choice</p>
+              <h5 class="font-headline text-lg font-bold">Midnight Wagyu Reserve</h5>
+              <p class="text-sm text-on-surface-variant line-clamp-1">Truffle-infused jus with organic heritage carrots.</p>
+              <button onclick="showPage('reservations')" class="mt-3 w-full py-2 border border-primary/30 text-primary text-xs font-bold rounded-lg hover:bg-primary hover:text-on-primary transition-all">Reserve Again</button>
+            </div>
+          </div>
+          <div class="snap-start min-w-[300px] glass-panel rounded-xl overflow-hidden group">
+            <div class="h-48 w-full relative">
+              <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlRoU8C_enIH6sjG3sAVxTn13IJ_Wy7msJJnnK4YmHBkKyzcHmmDprnqFI7rxX7nBVoFL1CjUGRWYNhpkUMofXsmKKgETRoRQ3MsvNFCaQaTivmd_F9hp8H4I6SDJDtB52SPXzs0pXo731-vGGU2wEKqx-waSQ8lCHwC70VWNqonOQFsdTWHnQy1Kwhkoo0Cfq-KNTLZVnlK0z__9qNmmwzDIqxUlhafi4lsENB96rCIJvJMV79p_nQdeOiv_cnnm9h5g9-XkBkx_Z" alt="Emerald Aether"/>
+              <div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent"></div>
+              <button class="absolute top-4 right-4 bg-surface/80 p-2 rounded-full text-tertiary"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">favorite</span></button>
+            </div>
+            <div class="p-5 space-y-1">
+              <p class="text-xs text-tertiary font-bold uppercase">Signature Drink</p>
+              <h5 class="font-headline text-lg font-bold">The Emerald Aether</h5>
+              <p class="text-sm text-on-surface-variant line-clamp-1">Smoked botanical gin with rare elderflower nectar.</p>
+              <button onclick="showPage('menu')" class="mt-3 w-full py-2 border border-primary/30 text-primary text-xs font-bold rounded-lg hover:bg-primary hover:text-on-primary transition-all">View in Menu</button>
+            </div>
+          </div>
+          <div class="snap-start min-w-[300px] glass-panel rounded-xl overflow-hidden group">
+            <div class="h-48 w-full relative">
+              <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAuP__xufGNx_o8FAGiviPd45zYW2S29th9ugdaxoGXp4ao-M80WvF3vVYhrnloZkZB2mhVF-bghyVLIairKRmy3R4IcXQ4c6pSf0avvhNgeQiYyZNoUV1tBnx29AxwSacB5fnFNsVlaD86D6HLQYanUA2G5zMlnsZxrz9OiyeXX9ZgYormHc-3U7qLpCVXjez5hGjVKpReH3agbV3sCRTy9gyd3_A4XfMTtgxFoEXrt9gjOpa-GcLPRQcph9wXTxQ2mBeaepsBCf8" alt="Sea Scallops"/>
+              <div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent"></div>
+              <button class="absolute top-4 right-4 bg-surface/80 p-2 rounded-full text-tertiary"><span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">favorite</span></button>
+            </div>
+            <div class="p-5 space-y-1">
+              <p class="text-xs text-tertiary font-bold uppercase">Seasonal</p>
+              <h5 class="font-headline text-lg font-bold">Glacial Sea Scallops</h5>
+              <p class="text-sm text-on-surface-variant line-clamp-1">Wild caught with citrus pearls and gold leaf.</p>
+              <button onclick="showPage('reservations')" class="mt-3 w-full py-2 border border-primary/30 text-primary text-xs font-bold rounded-lg hover:bg-primary hover:text-on-primary transition-all">Reserve Again</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity & Concierge -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="space-y-4">
+          <h3 class="font-headline text-xl font-bold">Recent Activity</h3>
+          <div class="space-y-3">
+            <div class="flex items-center gap-4 p-4 rounded-xl bg-surface-container-low border border-white/5 hover:bg-surface-container-high transition-colors">
+              <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary"><span class="material-symbols-outlined">payments</span></div>
+              <div class="flex-1"><p class="text-sm font-bold">Payment Confirmed</p><p class="text-xs text-outline">The Obsidian Table • Oct 20</p></div>
+              <p class="text-sm font-headline font-bold">-$840.00</p>
+            </div>
+            <div class="flex items-center gap-4 p-4 rounded-xl bg-surface-container-low border border-white/5 hover:bg-surface-container-high transition-colors">
+              <div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center text-secondary"><span class="material-symbols-outlined">star</span></div>
+              <div class="flex-1"><p class="text-sm font-bold">Points Earned</p><p class="text-xs text-outline">Bonus: Seasonal Visit • Oct 18</p></div>
+              <p class="text-sm font-headline font-bold text-primary">+1,200</p>
+            </div>
+          </div>
+        </div>
+        <div class="glass-panel p-8 rounded-xl flex flex-col justify-between bg-gradient-to-br from-primary-container/30 to-surface">
+          <div class="space-y-2">
+            <h3 class="font-headline text-2xl font-bold">The Concierge Is Online</h3>
+            <p class="text-on-surface-variant text-sm">Need a custom itinerary or private transportation? Our team is ready to assist you instantly.</p>
+          </div>
+          <div class="mt-6 flex items-center gap-4">
+            <div class="flex -space-x-2">
+              <img class="w-10 h-10 rounded-full border-2 border-surface object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAyc7SdHLiIP_dLgq-1ggGdR3rDHHIn3DMwRiTnmCfs6NspPKZQ6_S7qIl6TtnKAkjKKfxQG_z4a9ge5x0pSjhlAA4nPyACsxbzKXmJz0sIS7U_4UATn-q1_0-ig1tov0a83HMOCAh069q_rQMhc-nlmZRocUoYMa23zMStvaiKWc1PxGUqjDTdvPFWDTgE-6NjEPd2GVtMLe6janBQdkyVg4_CirZshlizvPbZ58Oi07owNpAnnTUb7BiquuGIu7LDa5pv--LRHKA6" alt="Concierge"/>
+              <img class="w-10 h-10 rounded-full border-2 border-surface object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZY35sVHlkfsIKegU7XgiMWiKLV4fOdathRTthxPxdzal1sZlIXSOdIhqGlbrTonoMJiAlK9YeRfHmVOP4-NEoVSveoXtf1VYYHUPdxoH_Yi_mhPIyoCqfVWutqF-7DcVI8sIEP3lhQfqSg4OShj2YWrDUbttg_oFm6efxtreqQXFDTlEMcITjBqKR4K_O3KGyVdgxpo1HEsAdqOkYbnyj5F1U0Vi4J_BPNDZXe3XlB5behcDLyxYiiEbCwNpbaBVfSvWokEKHYLmo" alt="Concierge"/>
+            </div>
+            <p class="text-xs text-outline">Average response: 2 mins</p>
+          </div>
+          <button class="mt-8 py-3 bg-white text-black font-bold rounded-xl hover:bg-emerald-100 transition-colors">Open Direct Chat</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ PAGE: AUTH ═══════════════════════════════════════════════════ -->
+<div id="page-auth" class="page">
+  <main class="min-h-screen flex flex-col md:flex-row">
+    <section class="hidden md:flex md:w-1/2 relative overflow-hidden items-center justify-center p-12">
+      <div class="absolute inset-0 z-0">
+        <img alt="Luxury wine" class="w-full h-full object-cover opacity-40 mix-blend-luminosity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA8nQheD9N6Ssd_8txg_1-1Q4N3Pl9P4sWuse8Yxk1M2hUqk6eEnF6Ds93oqkszY7ww3WaazpeVMQNK-wr1R5ScQJrHZdM4diI5NCT8SLsALn6n0jNPaiarb-VuGGlGveDLzr6l2kRHGG0EYjey-Y3XraakB8D9U7HdB2z8Bt-4zAT1mikgu76d0iPIJdDCt2JxvB-RpMsOMD-wwE_1bVQLYs0DI3ZV_PZziKR9NUINKrkwLgAsfZFhSTMMfbAgO2U418W_HKp-ph22"/>
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-container/90 via-surface/95 to-surface-container-lowest/100"></div>
+      </div>
+      <div class="absolute top-1/4 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-[120px]"></div>
+      <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-tertiary/10 rounded-full blur-[100px]"></div>
+      <div class="relative z-10 max-w-lg">
+        <div class="mb-8">
+          <span class="text-tertiary font-headline tracking-[0.4em] text-xs uppercase mb-4 block">Est. 2024</span>
+          <h1 class="font-headline text-6xl font-bold tracking-tighter text-primary uppercase leading-tight">Aethelgard</h1>
+        </div>
+        <p class="text-on-surface-variant text-lg leading-relaxed mb-8 font-light">Where culinary tradition meets futuristic precision. Enter a sanctuary of curated experiences and rare vintages.</p>
+        <div class="flex items-center gap-6">
+          <div class="flex -space-x-3">
+            <img class="w-10 h-10 rounded-full border-2 border-surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIY18-wWhZ7mkl8SESZVtidoWEICALU8JSQ8ERTgQpqvRD3If0JPCuzv1QbNoo5qF-rTu0h27wRASUpb3zNelDJc381ALzmlXFMD-OUj9-1o4HJWcdXaQ0PGTv6E_bfQhWvq4FkI74ys9UiU8hwcaJB3twngZpErUJWcpvAXsY5oF4ni0SXaWx_iFYq2sSPbCblN5vBw5FawKAwEkIZ5qwn8EF31dTIA0v9z-mQQmjF88Xw_v-0CojhD6KK7LWqszOl2voxL2YP7P_" alt="Member"/>
+            <img class="w-10 h-10 rounded-full border-2 border-surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQT7SCDSBelfnb_mboo6cL8e16ShchwsqDW0rcuIKI4dC6CNgSnwgpRGXrjCSF8PqInuaUtBVxeVMM0Nj2o0_0JJCKhigqgUMHct7XPkIqYxlRw4do6tCkyUkEHYOTHRFdGoEmVnCxK2JrE76xeFHHz31MzH5Fn3ZQ73tnRUS53Gk8Zk3SORJxd7ABxUv16MDYUQJFs_gFtHIfyarbjL1GE4b8JxKy8dTA2XK3XRyCfH5zrediX-8dJGqRnr0wdEaGUJXumyJtJjj2" alt="Member"/>
+            <img class="w-10 h-10 rounded-full border-2 border-surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuADMipQYwxtLs4kepT8cdyfvnq6cTtfdJBHMl8aASzPeU3WpivDF2Hj_K7EK52gRErT7d2OMe1rcwA8bDTyfzmkzQemgvywNsY7GRjNFu-qMwk9lrTpa_NIR5_J8Sh_7DRa2yY58ko1FblJCedur1LjJIT0V0DiMS9xX0O1cf43bVqQc5trKfoF9kOjXLucdr8jaN2Q8oHktxSVGLReOHx6v4Ssnw7SExD4ZiZgdlylTLDGNJv_s9Vb4sBHo8Tg7xuTMXyTb1_DBG9c" alt="Member"/>
+          </div>
+          <p class="text-sm text-on-surface-variant/80">Join <span class="text-tertiary font-bold">1,200+</span> members of the inner circle.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="flex-1 flex flex-col justify-center items-center p-6 md:p-12 aperture-bg relative">
+      <div class="md:hidden mb-12 text-center">
+        <h2 class="font-headline text-3xl font-bold text-primary tracking-tighter uppercase">Aethelgard</h2>
+      </div>
+      <div class="w-full max-w-md glass-card rounded-xl p-8 shadow-2xl relative overflow-hidden">
+        <div class="mb-10 text-center">
+          <h3 class="font-headline text-2xl font-bold text-on-surface mb-2" id="auth-title">Welcome Back</h3>
+          <p class="text-on-surface-variant text-sm" id="auth-subtitle">Please enter your credentials to access the cellar.</p>
+        </div>
+
+        <!-- Login Form -->
+        <div id="login-section">
+          <form class="space-y-6" onsubmit="handleLogin(event)">
+            <div class="space-y-4">
+              <div class="relative">
+                <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2 font-medium">Email Address</label>
+                <input class="w-full bg-transparent border-b border-outline/30 py-3 text-on-surface placeholder:text-outline-variant/50 transition-all form-input-glow focus:ring-0 px-0" placeholder="concierge@aethelgard.com" type="email"/>
+              </div>
+              <div class="relative">
+                <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2 font-medium">Password</label>
+                <input class="w-full bg-transparent border-b border-outline/30 py-3 text-on-surface placeholder:text-outline-variant/50 transition-all form-input-glow focus:ring-0 px-0" placeholder="••••••••" type="password"/>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <label class="flex items-center gap-2 cursor-pointer text-on-surface-variant hover:text-on-surface transition-colors">
+                <input class="rounded-sm bg-surface border-outline/50 text-primary focus:ring-primary/30" type="checkbox"/>Remember Me
+              </label>
+              <a class="text-tertiary hover:text-tertiary-fixed-dim transition-colors" href="#">Forgot Password?</a>
+            </div>
+            <button class="w-full py-4 bg-primary text-on-primary font-headline font-bold uppercase tracking-widest rounded-xl hover:brightness-110 transition-all button-glow active:scale-[0.98]" type="submit">Sign In</button>
+          </form>
+          <div class="mt-8">
+            <div class="relative flex items-center mb-8">
+              <div class="flex-grow border-t border-outline/10"></div>
+              <span class="flex-shrink mx-4 text-[10px] uppercase tracking-[0.3em] text-outline-variant">Or continue with</span>
+              <div class="flex-grow border-t border-outline/10"></div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <button onclick="handleLogin()" class="flex items-center justify-center gap-3 py-3 px-4 border border-outline/20 rounded-xl hover:bg-white/5 transition-all group">
+                <svg class="w-5 h-5 fill-on-surface-variant group-hover:fill-on-surface" viewBox="0 0 24 24"><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.908 3.152-1.928 4.176-1.224 1.224-3.136 2.592-7.136 2.592-6.32 0-11.36-5.12-11.36-11.44s5.04-11.44 11.36-11.44c3.424 0 5.864 1.352 7.68 3.088l2.312-2.312c-2.12-2.008-5.32-3.648-9.992-3.648-7.92 0-14.504 6.44-14.504 14.36s6.584 14.36 14.504 14.36c4.272 0 7.68-1.4 10.336-4.144 2.688-2.688 3.528-6.48 3.528-9.52 0-.912-.08-1.744-.24-2.544h-13.624z"></path></svg>
+                <span class="text-xs font-medium text-on-surface-variant group-hover:text-on-surface">Google</span>
+              </button>
+              <button onclick="handleLogin()" class="flex items-center justify-center gap-3 py-3 px-4 border border-outline/20 rounded-xl hover:bg-white/5 transition-all group">
+                <svg class="w-5 h-5 fill-on-surface-variant group-hover:fill-on-surface" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"></path></svg>
+                <span class="text-xs font-medium text-on-surface-variant group-hover:text-on-surface">GitHub</span>
+              </button>
+            </div>
+          </div>
+          <div class="mt-10 text-center">
+            <p class="text-sm text-on-surface-variant">Don't have an account? <button onclick="toggleAuth()" class="text-primary font-bold hover:underline ml-1">Join the Circle</button></p>
+          </div>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signup-section" class="hidden">
+          <form class="space-y-5" onsubmit="handleLogin(event)">
+            <div class="space-y-4">
+              <div class="relative">
+                <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2 font-medium">Full Name</label>
+                <input class="w-full bg-transparent border-b border-outline/30 py-3 text-on-surface placeholder:text-outline-variant/50 transition-all form-input-glow focus:ring-0 px-0" placeholder="Julian Aethelgard" type="text"/>
+              </div>
+              <div class="relative">
+                <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2 font-medium">Email Address</label>
+                <input class="w-full bg-transparent border-b border-outline/30 py-3 text-on-surface placeholder:text-outline-variant/50 transition-all form-input-glow focus:ring-0 px-0" placeholder="julian@circle.com" type="email"/>
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="relative">
+                  <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2 font-medium">Password</label>
+                  <input class="w-full bg-transparent border-b border-outline/30 py-3 text-on-surface placeholder:text-outline-variant/50 transition-all form-input-glow focus:ring-0 px-0" placeholder="••••••••" type="password"/>
+                </div>
+                <div class="relative">
+                  <label class="block text-xs uppercase tracking-widest text-on-surface-variant mb-2 font-medium">Confirm</label>
+                  <input class="w-full bg-transparent border-b border-outline/30 py-3 text-on-surface placeholder:text-outline-variant/50 transition-all form-input-glow focus:ring-0 px-0" placeholder="••••••••" type="password"/>
+                </div>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="flex justify-between text-[10px] uppercase tracking-wider text-outline-variant"><span>Password Strength</span><span class="text-tertiary">Exceptional</span></div>
+              <div class="flex gap-1 h-1"><div class="flex-1 bg-primary rounded-full"></div><div class="flex-1 bg-primary rounded-full"></div><div class="flex-1 bg-primary rounded-full"></div><div class="flex-1 bg-primary rounded-full"></div></div>
+            </div>
+            <button class="w-full py-4 bg-primary text-on-primary font-headline font-bold uppercase tracking-widest rounded-xl hover:brightness-110 transition-all button-glow mt-4 active:scale-[0.98]" type="submit">Create Account</button>
+          </form>
+          <div class="mt-10 text-center">
+            <p class="text-sm text-on-surface-variant">Already a member? <button onclick="toggleAuth()" class="text-primary font-bold hover:underline ml-1">Sign In Instead</button></p>
+          </div>
+        </div>
+      </div>
+      <div class="absolute bottom-10 left-10 text-[8px] uppercase tracking-[1em] text-outline-variant/30 hidden md:block">Atmospheric Excellence • Aethelgard • Privacy Assured</div>
+    </section>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ SHARED FOOTER ═══════════════════════════════════════════════════ -->
+<footer id="main-footer" class="bg-surface-container-lowest border-t border-white/5">
+  <div class="w-full px-8 py-16 grid grid-cols-1 md:grid-cols-4 gap-12 max-w-screen-2xl mx-auto">
+    <div class="md:col-span-1">
+      <button onclick="showPage('home')" class="text-2xl font-headline font-bold text-primary mb-6 uppercase tracking-tighter block">Aethelgard</button>
+      <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Redefining the essence of hospitality through the lens of artificial intelligence and ancestral culinary wisdom.</p>
+      <div class="flex gap-4">
+        <a href="#" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center hover:text-primary transition-colors"><span class="material-symbols-outlined">camera</span></a>
+        <a href="#" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center hover:text-primary transition-colors"><span class="material-symbols-outlined">alternate_email</span></a>
+      </div>
+    </div>
+    <div>
+      <h4 class="font-headline font-bold text-on-surface mb-6 uppercase tracking-widest text-xs">Navigation</h4>
+      <ul class="space-y-4 text-sm">
+        <li><button onclick="showPage('home')" class="text-on-surface-variant hover:text-primary transition-colors text-left">Our Story</button></li>
+        <li><button onclick="showPage('menu')" class="text-on-surface-variant hover:text-primary transition-colors text-left">Menu Philosophy</button></li>
+        <li><button onclick="showPage('home'); setTimeout(()=>document.getElementById('cellar').scrollIntoView({behavior:'smooth'}),300)" class="text-on-surface-variant hover:text-primary transition-colors text-left">Wine Cellar</button></li>
+        <li><button onclick="showPage('reservations')" class="text-on-surface-variant hover:text-primary transition-colors text-left">Reservations</button></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-headline font-bold text-on-surface mb-6 uppercase tracking-widest text-xs">Legal & Press</h4>
+      <ul class="space-y-4 text-sm">
+        <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Privacy Policy</a></li>
+        <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Terms of Service</a></li>
+        <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Press Kit</a></li>
+        <li><a href="#" class="text-on-surface-variant hover:text-primary transition-colors">Contact</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-headline font-bold text-on-surface mb-6 uppercase tracking-widest text-xs">Join the Circle</h4>
+      <p class="text-xs text-on-surface-variant mb-6">Subscribe to receive exclusive invitations to our seasonal events.</p>
+      <div class="relative">
+        <input class="w-full bg-surface-container-high border-none border-b border-outline/30 focus:border-primary focus:ring-0 text-sm py-3 transition-colors px-0" placeholder="email@address.com" type="email"/>
+        <button class="absolute right-0 top-1/2 -translate-y-1/2 text-primary font-bold text-sm">Subscribe</button>
+      </div>
+    </div>
+  </div>
+  <div class="w-full max-w-screen-2xl mx-auto px-8 pb-12">
+    <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-[10px] uppercase tracking-widest text-on-surface-variant/40">
+      <p>© 2024 Aethelgard. All rights reserved.</p>
+      <div class="flex gap-8"><span>Designed for the Elite</span><span>AI Integration Core v4.2</span></div>
+    </div>
+  </div>
+</footer>
+
+<!-- Mobile Bottom Nav -->
+<div id="mobile-nav" class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-zinc-900/90 backdrop-blur-2xl border-t border-white/5">
+  <div class="flex justify-around items-center h-16">
+    <button onclick="showPage('home')" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">home</span><span class="text-[10px] uppercase font-bold">Home</span>
+    </button>
+    <button onclick="showPage('menu')" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">restaurant_menu</span><span class="text-[10px] uppercase font-bold">Menu</span>
+    </button>
+    <button onclick="showPage('reservations')" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">calendar_today</span><span class="text-[10px] uppercase font-bold">Book</span>
+    </button>
+    <button onclick="showPage('dashboard')" class="flex flex-col items-center gap-1 text-zinc-400 hover:text-primary transition-colors">
+      <span class="material-symbols-outlined">person</span><span class="text-[10px] uppercase font-bold">Profile</span>
+    </button>
+  </div>
+</div>
+
+<script>
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const nav = document.getElementById('main-nav');
+  const footer = document.getElementById('main-footer');
+  const sidebar = document.getElementById('sidebar');
+  if (page === 'dashboard') {
+    nav.style.display = 'none';
+    footer.style.display = 'none';
+    sidebar.style.cssText = '';
+    document.getElementById('page-dashboard').style.paddingLeft = '';
+  } else {
+    nav.style.display = '';
+    footer.style.display = '';
+    sidebar.style.display = 'none';
+    sidebar.style.cssText = 'display:none!important;';
+  }
+  window.scrollTo(0, 0);
+}
+
+function toggleAuth() {
+  const login = document.getElementById('login-section');
+  const signup = document.getElementById('signup-section');
+  const title = document.getElementById('auth-title');
+  const subtitle = document.getElementById('auth-subtitle');
+  if (login.classList.contains('hidden')) {
+    login.classList.remove('hidden');
+    signup.classList.add('hidden');
+    title.textContent = 'Welcome Back';
+    subtitle.textContent = 'Please enter your credentials to access the cellar.';
+  } else {
+    login.classList.add('hidden');
+    signup.classList.remove('hidden');
+    title.textContent = 'Join the Circle';
+    subtitle.textContent = 'Become a part of our exclusive culinary ecosystem.';
+  }
+}
+
+function handleLogin(e) {
+  if (e) e.preventDefault();
+  showPage('dashboard');
+}
+
+function handleReservation(e) {
+  e.preventDefault();
+  document.querySelector('#page-reservations form').style.display = 'none';
+  document.getElementById('reservation-success').classList.remove('hidden');
+}
+
+function filterMenu(category, btn) {
+  document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.menu-item').forEach(item => {
+    const cat = item.getAttribute('data-category');
+    if (category === 'all' || cat === category || cat === 'all') {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+}
+
+function selectMood(card) {
+  document.querySelectorAll('.mood-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  const mood = card.querySelector('h3').textContent;
+  const recs = {
+    'Energetic': 'Based on your mood, we recommend the <strong class="text-primary">Solaris Salmon</strong> paired with our 2020 Sancerre.',
+    'Calm': 'Based on your mood, we recommend the <strong class="text-primary">Truffle Nexus</strong> paired with our Burgundy Pinot Noir.',
+    'Romantic': 'Based on your mood, we recommend the <strong class="text-primary">Midnight Wagyu Reserve</strong> paired with our 2018 Barolo.',
+    'Adventurous': 'Based on your mood, we recommend the <strong class="text-primary">Ethereal Moss Cocktail</strong> followed by the Obsidian Martini.'
+  };
+  document.getElementById('mood-text').innerHTML = recs[mood] || recs['Romantic'];
+  document.getElementById('mood-result').classList.remove('hidden');
+}
+
+function selectTime(el) {
+  document.querySelectorAll('.time-slot').forEach(t => t.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>
