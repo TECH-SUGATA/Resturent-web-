@@ -8,7 +8,7 @@
 
 ## 🚀 Live Demo
 
-🔗 **Website:** https://tech-sugata.github.io/Resturent-web/
+🔗 **Website:https://tech-sugata.github.io/Resturent-web-/
 
 ---
 
