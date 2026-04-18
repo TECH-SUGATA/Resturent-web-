@@ -1,876 +1,251 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-
-/* ═══════════════════════════════════════════════
-   DATABASE LAYER  (window.storage key-value store)
-═══════════════════════════════════════════════ */
-const DB = {
-  async getUsers() {
-    try { const r = await window.storage.get("fr:users"); return r ? JSON.parse(r.value) : {}; }
-    catch { return {}; }
-  },
-  async saveUsers(u) {
-    try { await window.storage.set("fr:users", JSON.stringify(u)); } catch {}
-  },
-  async getSession() {
-    try { const r = await window.storage.get("fr:session"); return r ? JSON.parse(r.value) : null; }
-    catch { return null; }
-  },
-  async saveSession(s) {
-    try { await window.storage.set("fr:session", JSON.stringify(s)); } catch {}
-  },
-  async clearSession() {
-    try { await window.storage.delete("fr:session"); } catch {}
-  },
-  async getCart(uid) {
-    try { const r = await window.storage.get(`fr:cart:${uid}`); return r ? JSON.parse(r.value) : []; }
-    catch { return []; }
-  },
-  async saveCart(uid, cart) {
-    try { await window.storage.set(`fr:cart:${uid}`, JSON.stringify(cart)); } catch {}
-  },
-  async getOrders(uid) {
-    try { const r = await window.storage.get(`fr:orders:${uid}`); return r ? JSON.parse(r.value) : []; }
-    catch { return []; }
-  },
-  async saveOrders(uid, orders) {
-    try { await window.storage.set(`fr:orders:${uid}`, JSON.stringify(orders)); } catch {}
-  },
-  async updateUser(uid, data) {
-    const users = await DB.getUsers();
-    users[uid] = { ...users[uid], ...data };
-    await DB.saveUsers(users);
-    return users[uid];
-  }
-};
-
-/* ═══════════════════════ DATA ══════════════════════ */
-const RESTAURANTS = [
-  { id: 1, name: "Spice Garden", cuisine: "Indian", rating: 4.8, time: "25–35", delivery: 0, tag: "Popular", color: "#F97316", emoji: "🍛", bg: "linear-gradient(135deg,#2a1200,#1a0a00)", minOrder: 199, promo: "20% off above ₹499" },
-  { id: 2, name: "Dragon Palace", cuisine: "Chinese", rating: 4.6, time: "30–40", delivery: 29, tag: "Trending", color: "#EF4444", emoji: "🥡", bg: "linear-gradient(135deg,#1a0000,#0f0808)", minOrder: 149, promo: "Free spring roll above ₹399" },
-  { id: 3, name: "Bella Italia", cuisine: "Italian", rating: 4.7, time: "20–30", delivery: 0, tag: "New", color: "#10B981", emoji: "🍕", bg: "linear-gradient(135deg,#001a0d,#000f08)", minOrder: 249, promo: "Combo deal available" },
-  { id: 4, name: "Burger Barn", cuisine: "American", rating: 4.5, time: "15–25", delivery: 0, tag: "Fast", color: "#F5A623", emoji: "🍔", bg: "linear-gradient(135deg,#1a1000,#0f0a00)", minOrder: 99, promo: "Buy 2 get 1 free sides" },
-  { id: 5, name: "Sushi Zen", cuisine: "Japanese", rating: 4.9, time: "35–45", delivery: 49, tag: "Premium", color: "#8B5CF6", emoji: "🍣", bg: "linear-gradient(135deg,#0d001a,#08000f)", minOrder: 399, promo: "Chef's special today" },
-  { id: 6, name: "Shawarma Stop", cuisine: "Lebanese", rating: 4.4, time: "20–30", delivery: 0, tag: "Value", color: "#06B6D4", emoji: "🌯", bg: "linear-gradient(135deg,#00141a,#000a0f)", minOrder: 149, promo: "Free drink on ₹299+" },
-];
-
-const MENU = {
-  1: [
-    { id: 101, name: "Butter Chicken", desc: "Rich tomato cream gravy, charcoal-grilled chicken pieces", price: 289, veg: false, rating: 4.9, tag: "Bestseller", cal: 420 },
-    { id: 102, name: "Paneer Tikka Masala", desc: "Cottage cheese in spiced onion-tomato gravy", price: 249, veg: true, rating: 4.7, tag: "Veg Special", cal: 380 },
-    { id: 103, name: "Dal Makhani", desc: "Slow-cooked black lentils with butter and cream", price: 199, veg: true, rating: 4.8, tag: "", cal: 310 },
-    { id: 104, name: "Biryani (Chicken)", desc: "Dum-cooked basmati rice with aromatic spices", price: 329, veg: false, rating: 4.9, tag: "Chef's Pick", cal: 560 },
-    { id: 105, name: "Naan Basket (4 pcs)", desc: "Fresh tandoor-baked naan bread", price: 99, veg: true, rating: 4.6, tag: "", cal: 240 },
-    { id: 106, name: "Gulab Jamun", desc: "Soft khoya dumplings in rose syrup", price: 89, veg: true, rating: 4.5, tag: "Dessert", cal: 290 },
-  ],
-  2: [
-    { id: 201, name: "Kung Pao Chicken", desc: "Crispy chicken tossed with peanuts & dried chillies", price: 279, veg: false, rating: 4.7, tag: "Spicy", cal: 390 },
-    { id: 202, name: "Veg Fried Rice", desc: "Wok-tossed rice with seasonal vegetables", price: 199, veg: true, rating: 4.5, tag: "", cal: 350 },
-    { id: 203, name: "Dim Sum Basket", desc: "Steamed dumplings with ginger soy sauce", price: 229, veg: false, rating: 4.8, tag: "Popular", cal: 280 },
-    { id: 204, name: "Chilli Paneer", desc: "Crispy paneer in tangy Schezwan sauce", price: 239, veg: true, rating: 4.6, tag: "", cal: 320 },
-    { id: 205, name: "Honey Chilli Potato", desc: "Golden fried potatoes drizzled with honey chilli", price: 179, veg: true, rating: 4.7, tag: "Bestseller", cal: 410 },
-    { id: 206, name: "Mango Pudding", desc: "Silky smooth mango dessert with fresh mango pieces", price: 119, veg: true, rating: 4.4, tag: "Dessert", cal: 220 },
-  ],
-  3: [
-    { id: 301, name: "Margherita Pizza", desc: "Classic tomato, mozzarella & fresh basil", price: 349, veg: true, rating: 4.8, tag: "Classic", cal: 720 },
-    { id: 302, name: "Penne Arrabbiata", desc: "Spicy tomato-garlic sauce with Italian herbs", price: 279, veg: true, rating: 4.6, tag: "Veg", cal: 480 },
-    { id: 303, name: "Chicken Alfredo", desc: "Creamy parmesan sauce with grilled chicken strips", price: 369, veg: false, rating: 4.9, tag: "Bestseller", cal: 660 },
-    { id: 304, name: "Bruschetta", desc: "Toasted sourdough with tomato, basil, olive oil", price: 189, veg: true, rating: 4.5, tag: "Starter", cal: 280 },
-    { id: 305, name: "Tiramisu", desc: "Classic espresso-soaked ladyfinger dessert", price: 199, veg: true, rating: 4.9, tag: "Dessert", cal: 340 },
-  ],
-  4: [
-    { id: 401, name: "Classic Smash Burger", desc: "Double smash patty, American cheese, pickles", price: 219, veg: false, rating: 4.8, tag: "Bestseller", cal: 580 },
-    { id: 402, name: "Crispy Chicken Burger", desc: "Buttermilk fried chicken, slaw, chipotle mayo", price: 199, veg: false, rating: 4.7, tag: "Popular", cal: 520 },
-    { id: 403, name: "Veggie Supreme Burger", desc: "Black bean patty with avocado, tomato salsa", price: 179, veg: true, rating: 4.5, tag: "Veg", cal: 440 },
-    { id: 404, name: "Loaded Fries", desc: "Thick-cut fries with cheese sauce & jalapeños", price: 149, veg: true, rating: 4.6, tag: "", cal: 490 },
-    { id: 405, name: "Oreo Milkshake", desc: "Thick-blended shake with Oreo cookie crumble", price: 129, veg: true, rating: 4.7, tag: "Drink", cal: 380 },
-  ],
-  5: [
-    { id: 501, name: "Salmon Nigiri (6 pcs)", desc: "Fresh Atlantic salmon over seasoned sushi rice", price: 499, veg: false, rating: 4.9, tag: "Premium", cal: 310 },
-    { id: 502, name: "Dragon Roll", desc: "Prawn tempura, avocado & eel sauce", price: 549, veg: false, rating: 4.9, tag: "Bestseller", cal: 420 },
-    { id: 503, name: "Edamame", desc: "Steamed salted soybean pods", price: 149, veg: true, rating: 4.6, tag: "Starter", cal: 120 },
-    { id: 504, name: "Miso Ramen", desc: "Rich miso broth, chashu pork, soft egg, nori", price: 379, veg: false, rating: 4.8, tag: "", cal: 540 },
-    { id: 505, name: "Matcha Ice Cream", desc: "House-churned ceremonial matcha gelato", price: 199, veg: true, rating: 4.7, tag: "Dessert", cal: 180 },
-  ],
-  6: [
-    { id: 601, name: "Chicken Shawarma", desc: "Marinated chicken, garlic sauce, pickles in pita", price: 179, veg: false, rating: 4.8, tag: "Bestseller", cal: 520 },
-    { id: 602, name: "Falafel Wrap", desc: "Crispy chickpea fritters, hummus, tabbouleh", price: 149, veg: true, rating: 4.6, tag: "Veg", cal: 440 },
-    { id: 603, name: "Hummus Platter", desc: "Creamy hummus with olive oil, pita, veggies", price: 189, veg: true, rating: 4.7, tag: "", cal: 350 },
-    { id: 604, name: "Lamb Kofta Plate", desc: "Spiced minced lamb, fattoush, garlic labneh", price: 299, veg: false, rating: 4.8, tag: "Chef's Pick", cal: 580 },
-    { id: 605, name: "Baklava (3 pcs)", desc: "Phyllo pastry layers with pistachios & honey", price: 129, veg: true, rating: 4.5, tag: "Dessert", cal: 310 },
-  ],
-};
-
-const CATEGORIES = ["All", "Indian", "Chinese", "Italian", "American", "Japanese", "Lebanese"];
-const TAG_COLORS = { Bestseller:"#F5A623", Popular:"#06D6A0", "Veg Special":"#84CC16", "Chef's Pick":"#8B5CF6", Spicy:"#EF4444", New:"#38BDF8", Premium:"#EC4899", Classic:"#F97316", Starter:"#06B6D4", Dessert:"#F43F5E", Drink:"#A78BFA", Veg:"#84CC16" };
-
-/* ═══════════════════ STYLES ═══════════════════ */
-const S = {
-  app: { minHeight:"100vh", background:"#04040A", color:"#F8F4EE", fontFamily:"'Space Grotesk',sans-serif", position:"relative", overflow:"hidden" },
-  nav: { position:"fixed", top:0, left:0, right:0, zIndex:200, height:64, padding:"0 20px", display:"flex", alignItems:"center", justifyContent:"space-between", background:"rgba(4,4,10,.92)", backdropFilter:"blur(30px)", borderBottom:"1px solid rgba(255,255,255,.07)" },
-  logo: { fontWeight:800, fontSize:22, background:"linear-gradient(135deg,#F5A623,#FF6B6B,#A78BFA)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text", letterSpacing:.5 },
-  page: { paddingTop:76, paddingBottom:88, minHeight:"100vh" },
-  card: { background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:22, backdropFilter:"blur(20px)", transition:"all .35s" },
-  btnPrimary: { background:"linear-gradient(135deg,#F5A623,#F97316)", color:"#000", fontWeight:700, border:"none", borderRadius:14, padding:"14px 28px", cursor:"pointer", fontSize:15, display:"inline-flex", alignItems:"center", gap:8, transition:"all .3s", letterSpacing:.3 },
-  btnOutline: { background:"transparent", border:"1.5px solid rgba(255,255,255,.15)", color:"#F8F4EE", borderRadius:14, padding:"13px 24px", cursor:"pointer", fontSize:14, fontWeight:600, display:"inline-flex", alignItems:"center", gap:8, transition:"all .25s" },
-  input: { width:"100%", background:"rgba(255,255,255,.05)", border:"1.5px solid rgba(255,255,255,.09)", borderRadius:14, padding:"14px 18px", color:"#F8F4EE", fontFamily:"inherit", fontSize:15, outline:"none", transition:"all .3s", boxSizing:"border-box" },
-  label: { display:"block", fontSize:11, fontWeight:700, color:"#9090A8", letterSpacing:.8, marginBottom:8, textTransform:"uppercase" },
-  muted: { color:"#9090A8" },
-  pill: (on) => ({ padding:"8px 16px", borderRadius:22, whiteSpace:"nowrap", background: on ? "rgba(245,166,35,.12)" : "rgba(255,255,255,.04)", border: on ? "1.5px solid rgba(245,166,35,.45)" : "1.5px solid rgba(255,255,255,.08)", cursor:"pointer", fontSize:13, fontWeight:600, color: on ? "#F5A623" : "#9090A8", transition:"all .22s" }),
-  bnav: { position:"fixed", bottom:0, left:0, right:0, zIndex:150, height:72, display:"flex", alignItems:"center", justifyContent:"space-around", background:"rgba(4,4,10,.95)", backdropFilter:"blur(30px)", borderTop:"1px solid rgba(255,255,255,.07)" },
-};
-
-/* ═══════════════════ TOAST HOOK ══════════════════ */
-function useToast() {
-  const [toast, setToast] = useState(null);
-  const show = useCallback((msg, icon="✓") => {
-    setToast({ msg, icon });
-    setTimeout(() => setToast(null), 2500);
-  }, []);
-  return [toast, show];
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FeastRush — Premium Food Delivery</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Syne:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+:root{
+  --bg:#04040A;--s1:#080810;--s2:#0E0E1A;--s3:#141420;--s4:#1C1C2C;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.11);--border3:rgba(255,255,255,.18);
+  /* Multi-color accent system */
+  --gold:#F5A623;--gold2:#FFD166;--gold3:#FFE5A0;
+  --coral:#FF6B6B;--coral2:#FF8E8E;
+  --teal:#06D6A0;--teal2:#00F5C4;
+  --violet:#7C3AED;--violet2:#A78BFA;
+  --rose:#F43F5E;--rose2:#FB7185;
+  --sky:#0EA5E9;--sky2:#38BDF8;
+  --orange:#F97316;--orange2:#FB923C;
+  --pink:#EC4899;--pink2:#F472B6;
+  --lime:#84CC16;--lime2:#A3E635;
+  --text:#F8F4EE;--muted:#9090A8;--muted2:#58586E;--muted3:#3A3A50;
+  --glass:rgba(255,255,255,.03);--glass2:rgba(255,255,255,.06);--glass3:rgba(255,255,255,.09);
 }
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;overflow-x:hidden;min-height:100vh}
+h1,h2,h3{font-family:'Playfair Display',serif}
+.syne{font-family:'Syne',sans-serif}
 
-/* ═══════════════════ AURORA BG ══════════════════ */
-function Aurora() {
-  return (
-    <div style={{ position:"fixed", inset:0, zIndex:0, overflow:"hidden", pointerEvents:"none" }}>
-      <div style={{ position:"absolute", width:700, height:700, borderRadius:"50%", background:"radial-gradient(circle,rgba(245,166,35,.1),transparent 70%)", top:-250, left:-200, filter:"blur(100px)", animation:"blobFloat 18s ease-in-out infinite alternate" }} />
-      <div style={{ position:"absolute", width:600, height:600, borderRadius:"50%", background:"radial-gradient(circle,rgba(255,107,107,.08),transparent 70%)", bottom:-150, right:-100, filter:"blur(100px)", animation:"blobFloat 14s ease-in-out infinite alternate", animationDelay:"-5s" }} />
-      <div style={{ position:"absolute", width:500, height:500, borderRadius:"50%", background:"radial-gradient(circle,rgba(124,58,237,.07),transparent 70%)", top:"40%", left:"20%", filter:"blur(100px)", animation:"blobFloat 20s ease-in-out infinite alternate", animationDelay:"-9s" }} />
-      <style>{`@keyframes blobFloat{0%{transform:translate(0,0)}50%{transform:translate(60px,-70px)}100%{transform:translate(-40px,50px)}}`}</style>
-    </div>
-  );
+/* AURORA BG */
+.aurora{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(120px);animation:blobFloat 16s ease-in-out infinite alternate;will-change:transform}
+.b1{width:800px;height:800px;background:radial-gradient(circle,rgba(245,166,35,.12),transparent 70%);top:-300px;left:-200px;animation-duration:18s}
+.b2{width:700px;height:700px;background:radial-gradient(circle,rgba(255,107,107,.1),transparent 70%);bottom:-200px;right:-100px;animation-duration:14s;animation-delay:-5s}
+.b3{width:600px;height:600px;background:radial-gradient(circle,rgba(124,58,237,.08),transparent 70%);top:35%;left:25%;animation-duration:20s;animation-delay:-3s}
+.b4{width:500px;height:500px;background:radial-gradient(circle,rgba(6,214,160,.07),transparent 70%);bottom:15%;left:5%;animation-duration:15s;animation-delay:-8s}
+.b5{width:400px;height:400px;background:radial-gradient(circle,rgba(14,165,233,.06),transparent 70%);top:20%;right:10%;animation-duration:22s;animation-delay:-11s}
+.b6{width:350px;height:350px;background:radial-gradient(circle,rgba(236,72,153,.06),transparent 70%);bottom:40%;right:25%;animation-duration:17s;animation-delay:-6s}
+@keyframes blobFloat{
+  0%{transform:translate(0,0) scale(1)}25%{transform:translate(60px,-80px) scale(1.12)}
+  50%{transform:translate(-50px,70px) scale(.92)}75%{transform:translate(90px,40px) scale(1.08)}
+  100%{transform:translate(-30px,-60px) scale(1.04)}
 }
-
-/* ═══════════════════ BOTTOM NAV ══════════════════ */
-function BottomNav({ page, setPage, cartCount }) {
-  const items = [
-    { id:"home", icon:"🏠", label:"Home" },
-    { id:"explore", icon:"🔍", label:"Explore" },
-    { id:"orders", icon:"📦", label:"Orders" },
-    { id:"profile", icon:"👤", label:"Profile" },
-  ];
-  return (
-    <div style={S.bnav}>
-      {items.map(n => (
-        <div key={n.id} onClick={() => setPage(n.id)} style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, cursor:"pointer", color: page===n.id ? "#F5A623" : "#58586E", fontSize:9, fontWeight:700, letterSpacing:.6, textTransform:"uppercase", minWidth:54, transition:"color .2s", position:"relative" }}>
-          <span style={{ fontSize:20, filter: page===n.id ? "drop-shadow(0 0 8px rgba(245,166,35,.7))" : "none", transition:"filter .25s" }}>{n.icon}</span>
-          {n.label}
-          {n.id==="orders" && cartCount > 0 && (
-            <span style={{ position:"absolute", top:-2, right:8, background:"#EF4444", color:"#fff", borderRadius:"50%", width:16, height:16, fontSize:10, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center" }}>{cartCount}</span>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ═══════════════════ AUTH PAGE ══════════════════ */
-function AuthPage({ onAuth }) {
-  const [tab, setTab] = useState("login");
-  const [form, setForm] = useState({ name:"", email:"", phone:"", password:"", confirm:"" });
-  const [err, setErr] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [, show] = useToast();
-
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  const validate = () => {
-    const e = {};
-    if (tab==="signup" && !form.name.trim()) e.name = "Name required";
-    if (!form.email.includes("@")) e.email = "Valid email required";
-    if (form.password.length < 6) e.password = "Min 6 characters";
-    if (tab==="signup" && form.password !== form.confirm) e.confirm = "Passwords don't match";
-    if (tab==="signup" && !/^\d{10}$/.test(form.phone)) e.phone = "10-digit phone required";
-    setErr(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const submit = async () => {
-    if (!validate()) return;
-    setLoading(true);
-    const users = await DB.getUsers();
-    if (tab === "login") {
-      const user = Object.values(users).find(u => u.email === form.email && u.password === form.password);
-      if (!user) { setErr({ email:"Invalid email or password" }); setLoading(false); return; }
-      await DB.saveSession({ uid: user.uid, email: user.email });
-      onAuth(user);
-    } else {
-      if (Object.values(users).some(u => u.email === form.email)) { setErr({ email:"Email already registered" }); setLoading(false); return; }
-      const uid = "u_" + Date.now();
-      const user = { uid, name: form.name.trim(), email: form.email, phone: form.phone, password: form.password, joined: new Date().toISOString(), avatar: form.name.trim()[0].toUpperCase() };
-      users[uid] = user;
-      await DB.saveUsers(users);
-      await DB.saveSession({ uid, email: user.email });
-      onAuth(user);
-    }
-    setLoading(false);
-  };
-
-  const inp = (k, placeholder, type="text") => (
-    <div style={{ marginBottom:16 }}>
-      <input style={{ ...S.input, borderColor: err[k] ? "#FF6B6B" : "rgba(255,255,255,.09)", ...(true && { outline:"none" }) }}
-        type={type} placeholder={placeholder} value={form[k]} onChange={e => set(k, e.target.value)}
-        onKeyDown={e => e.key==="Enter" && submit()}
-        onFocus={e => e.target.style.borderColor = err[k] ? "#FF6B6B" : "rgba(245,166,35,.5)"}
-        onBlur={e => e.target.style.borderColor = err[k] ? "#FF6B6B" : "rgba(255,255,255,.09)"}
-      />
-      {err[k] && <div style={{ color:"#FF6B6B", fontSize:12, marginTop:5 }}>{err[k]}</div>}
-    </div>
-  );
-
-  return (
-    <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", padding:24, position:"relative", zIndex:2 }}>
-      <div style={{ width:"100%", maxWidth:420, background:"rgba(255,255,255,.025)", border:"1px solid rgba(255,255,255,.1)", borderRadius:28, padding:"40px 32px", backdropFilter:"blur(36px)", boxShadow:"0 50px 120px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.07)" }}>
-        <div style={{ textAlign:"center", marginBottom:32 }}>
-          <div style={{ fontSize:40, marginBottom:12 }}>🍽️</div>
-          <div style={S.logo}>FeastRush</div>
-          <div style={{ ...S.muted, fontSize:14, marginTop:8 }}>Premium food delivery at your door</div>
-        </div>
-
-        <div style={{ display:"flex", background:"rgba(255,255,255,.04)", borderRadius:12, padding:4, marginBottom:28 }}>
-          {["login","signup"].map(t => (
-            <div key={t} onClick={() => { setTab(t); setErr({}); }} style={{ flex:1, textAlign:"center", padding:"10px 0", borderRadius:10, cursor:"pointer", fontSize:14, fontWeight:700, transition:"all .25s", background: tab===t ? "rgba(245,166,35,.15)" : "transparent", color: tab===t ? "#F5A623" : "#9090A8", border: tab===t ? "1px solid rgba(245,166,35,.3)" : "1px solid transparent" }}>
-              {t === "login" ? "Sign In" : "Sign Up"}
-            </div>
-          ))}
-        </div>
-
-        {tab==="signup" && inp("name","Full name")}
-        {inp("email","Email address","email")}
-        {tab==="signup" && inp("phone","Phone number","tel")}
-        {inp("password","Password","password")}
-        {tab==="signup" && inp("confirm","Confirm password","password")}
-
-        <button style={{ ...S.btnPrimary, width:"100%", justifyContent:"center", marginTop:8, opacity: loading ? .7 : 1 }} onClick={submit} disabled={loading}>
-          {loading ? "Please wait…" : tab==="login" ? "Sign In →" : "Create Account →"}
-        </button>
-
-        <div style={{ textAlign:"center", marginTop:20, fontSize:13, color:"#58586E" }}>
-          {tab==="login" ? "New here? " : "Already have an account? "}
-          <span style={{ color:"#F5A623", cursor:"pointer", fontWeight:600 }} onClick={() => { setTab(tab==="login"?"signup":"login"); setErr({}); }}>
-            {tab==="login" ? "Sign up free" : "Sign in"}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════ RESTAURANT CARD ══════════════════ */
-function RestaurantCard({ r, onClick }) {
-  const [hov, setHov] = useState(false);
-  return (
-    <div onClick={() => onClick(r)} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
-      style={{ ...S.card, cursor:"pointer", overflow:"hidden", transform: hov ? "translateY(-6px)" : "none", boxShadow: hov ? "0 24px 60px rgba(0,0,0,.5)" : "none", borderColor: hov ? "rgba(245,166,35,.25)" : "rgba(255,255,255,.07)" }}>
-      <div style={{ height:140, background:r.bg, position:"relative", display:"flex", alignItems:"center", justifyContent:"center", overflow:"hidden" }}>
-        <div style={{ fontSize:70, animation:`floatEmoji 4s ease-in-out infinite`, position:"relative", zIndex:1 }}>{r.emoji}</div>
-        <div style={{ position:"absolute", top:12, right:12 }}>
-          <span style={{ background:"rgba(0,0,0,.55)", border:"1px solid rgba(255,255,255,.12)", borderRadius:20, padding:"4px 10px", fontSize:11, fontWeight:700, color: r.color }}>{r.tag}</span>
-        </div>
-        {r.delivery === 0 && <div style={{ position:"absolute", bottom:10, left:12 }}><span style={{ background:"rgba(6,214,160,.18)", border:"1px solid rgba(6,214,160,.3)", borderRadius:20, padding:"3px 10px", fontSize:11, fontWeight:700, color:"#06D6A0" }}>FREE delivery</span></div>}
-      </div>
-      <div style={{ padding:"14px 16px" }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:6 }}>
-          <div style={{ fontWeight:700, fontSize:16 }}>{r.name}</div>
-          <div style={{ background:"rgba(6,214,160,.1)", color:"#06D6A0", padding:"3px 9px", borderRadius:8, fontSize:12, fontWeight:700, border:"1px solid rgba(6,214,160,.22)", display:"flex", alignItems:"center", gap:4 }}>⭐ {r.rating}</div>
-        </div>
-        <div style={{ ...S.muted, fontSize:13, marginBottom:10 }}>{r.cuisine}</div>
-        <div style={{ display:"flex", gap:12, fontSize:12, color:"#58586E" }}>
-          <span>⏱ {r.time} min</span>
-          <span>•</span>
-          <span>{r.delivery === 0 ? "Free delivery" : `₹${r.delivery} delivery`}</span>
-          <span>•</span>
-          <span>Min ₹{r.minOrder}</span>
-        </div>
-        {r.promo && <div style={{ marginTop:10, background:"rgba(245,166,35,.08)", border:"1px solid rgba(245,166,35,.2)", borderRadius:10, padding:"6px 10px", fontSize:12, color:"#F5A623" }}>🏷 {r.promo}</div>}
-      </div>
-      <style>{`@keyframes floatEmoji{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}`}</style>
-    </div>
-  );
-}
-
-/* ═══════════════════ HOME PAGE ══════════════════ */
-function HomePage({ user, setPage, onRestaurant }) {
-  const [cat, setCat] = useState("All");
-  const [search, setSearch] = useState("");
-  const filtered = RESTAURANTS.filter(r => (cat==="All" || r.cuisine===cat) && (r.name.toLowerCase().includes(search.toLowerCase()) || r.cuisine.toLowerCase().includes(search.toLowerCase())));
-  const hour = new Date().getHours();
-  const greet = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-
-  return (
-    <div style={{ ...S.page, padding:"76px 20px 88px", maxWidth:520, margin:"0 auto" }}>
-      <div style={{ marginBottom:24 }}>
-        <div style={{ ...S.muted, fontSize:13, marginBottom:4 }}>{greet} 👋</div>
-        <div style={{ fontSize:24, fontWeight:700, fontFamily:"'Playfair Display',serif" }}>Hey, <span style={{ color:"#F5A623" }}>{user.name.split(" ")[0]}</span>!</div>
-        <div style={{ ...S.muted, fontSize:14, marginTop:4 }}>What are you craving today?</div>
-      </div>
-
-      <div style={{ display:"flex", alignItems:"center", gap:12, background:"rgba(255,255,255,.045)", border:"1.5px solid rgba(255,255,255,.08)", borderRadius:16, padding:"0 16px", height:52, marginBottom:20 }}>
-        <span style={{ ...S.muted }}>🔍</span>
-        <input style={{ background:"transparent", border:"none", outline:"none", color:"#F8F4EE", fontFamily:"inherit", fontSize:15, flex:1 }} placeholder="Search restaurants or cuisines…" value={search} onChange={e => setSearch(e.target.value)} />
-        {search && <span onClick={() => setSearch("")} style={{ ...S.muted, cursor:"pointer", fontSize:18 }}>×</span>}
-      </div>
-
-      <div style={{ display:"flex", gap:8, overflowX:"auto", paddingBottom:4, marginBottom:24, scrollbarWidth:"none" }}>
-        {CATEGORIES.map(c => <div key={c} onClick={() => setCat(c)} style={S.pill(cat===c)}>{c}</div>)}
-      </div>
-
-      {filtered.length === 0 ? (
-        <div style={{ textAlign:"center", padding:"60px 20px", color:"#58586E" }}>
-          <div style={{ fontSize:48, marginBottom:16 }}>😕</div>
-          <div style={{ fontSize:16, fontWeight:600, color:"#9090A8" }}>No restaurants found</div>
-          <div style={{ fontSize:13, marginTop:8 }}>Try a different search or category</div>
-        </div>
-      ) : (
-        <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-          {filtered.map(r => <RestaurantCard key={r.id} r={r} onClick={onRestaurant} />)}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ═══════════════════ MENU PAGE ══════════════════ */
-function MenuPage({ restaurant, cart, onAdd, onRemove, setPage, showToast }) {
-  const items = MENU[restaurant.id] || [];
-  const cartTotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const cartCount = cart.reduce((s, i) => s + i.qty, 0);
-
-  const getQty = (id) => cart.find(i => i.id === id)?.qty || 0;
-
-  return (
-    <div style={{ ...S.page, padding:"76px 0 88px", maxWidth:520, margin:"0 auto" }}>
-      <div style={{ padding:"0 20px 20px" }}>
-        <button onClick={() => setPage("home")} style={{ ...S.btnOutline, padding:"10px 16px", fontSize:13, marginBottom:16 }}>← Back</button>
-        <div style={{ height:160, borderRadius:20, background:restaurant.bg, display:"flex", alignItems:"center", justifyContent:"center", marginBottom:16, position:"relative", overflow:"hidden" }}>
-          <span style={{ fontSize:80 }}>{restaurant.emoji}</span>
-          <div style={{ position:"absolute", bottom:14, left:16 }}>
-            <div style={{ background:"rgba(6,214,160,.12)", color:"#06D6A0", padding:"3px 10px", borderRadius:8, fontSize:12, fontWeight:700, border:"1px solid rgba(6,214,160,.22)", display:"inline-flex", alignItems:"center", gap:4 }}>⭐ {restaurant.rating}</div>
-          </div>
-        </div>
-        <div style={{ fontSize:24, fontWeight:700 }}>{restaurant.name}</div>
-        <div style={{ ...S.muted, fontSize:14, marginTop:4, marginBottom:8 }}>{restaurant.cuisine} • {restaurant.time} min • {restaurant.delivery === 0 ? "Free delivery" : `₹${restaurant.delivery} delivery`}</div>
-        {restaurant.promo && <div style={{ background:"rgba(245,166,35,.08)", border:"1px solid rgba(245,166,35,.2)", borderRadius:12, padding:"8px 14px", fontSize:13, color:"#F5A623" }}>🏷 {restaurant.promo}</div>}
-      </div>
-
-      <div style={{ height:1, background:"rgba(255,255,255,.06)", margin:"0 20px 20px" }} />
-
-      <div style={{ padding:"0 20px", display:"flex", flexDirection:"column", gap:12 }}>
-        {items.map(item => {
-          const qty = getQty(item.id);
-          return (
-            <div key={item.id} style={{ ...S.card, display:"flex", gap:0, overflow:"hidden" }}>
-              <div style={{ flex:1, padding:"14px 16px" }}>
-                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:6 }}>
-                  <div style={{ width:14, height:14, borderRadius:3, border:`1.5px solid ${item.veg ? "#06D6A0" : "#FF6B6B"}`, display:"inline-flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                    <div style={{ width:7, height:7, background:item.veg ? "#06D6A0" : "#FF6B6B", borderRadius:"50%" }} />
-                  </div>
-                  <div style={{ fontWeight:600, fontSize:15 }}>{item.name}</div>
-                  {item.tag && <span style={{ background:`${TAG_COLORS[item.tag] || "#F5A623"}20`, color:TAG_COLORS[item.tag] || "#F5A623", border:`1px solid ${TAG_COLORS[item.tag] || "#F5A623"}40`, borderRadius:20, padding:"2px 9px", fontSize:10, fontWeight:700 }}>{item.tag}</span>}
-                </div>
-                <div style={{ ...S.muted, fontSize:12, lineHeight:1.5, marginBottom:10 }}>{item.desc}</div>
-                <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                  <div>
-                    <span style={{ fontWeight:700, fontSize:16, color:"#F5A623" }}>₹{item.price}</span>
-                    <span style={{ ...S.muted, fontSize:11, marginLeft:8 }}>{item.cal} kcal</span>
-                  </div>
-                  {qty === 0 ? (
-                    <button onClick={() => { onAdd(item, restaurant); showToast(`${item.name} added`, "✓"); }}
-                      style={{ width:36, height:36, borderRadius:10, background:"transparent", border:"1.5px solid rgba(245,166,35,.5)", color:"#F5A623", fontSize:22, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", fontWeight:300, transition:"all .25s" }}>+</button>
-                  ) : (
-                    <div style={{ display:"flex", alignItems:"center", background:"rgba(245,166,35,.1)", border:"1px solid rgba(245,166,35,.3)", borderRadius:12, overflow:"hidden" }}>
-                      <button onClick={() => onRemove(item.id)} style={{ width:36, height:36, background:"transparent", border:"none", color:"#F5A623", fontSize:18, fontWeight:700, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>−</button>
-                      <span style={{ minWidth:28, textAlign:"center", fontWeight:700, fontSize:14, color:"#F8F4EE" }}>{qty}</span>
-                      <button onClick={() => { onAdd(item, restaurant); }} style={{ width:36, height:36, background:"transparent", border:"none", color:"#F5A623", fontSize:18, fontWeight:700, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>+</button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {cartCount > 0 && (
-        <div style={{ position:"fixed", bottom:84, left:0, right:0, padding:"0 20px", zIndex:100 }}>
-          <button onClick={() => setPage("cart")} style={{ ...S.btnPrimary, width:"100%", justifyContent:"space-between", borderRadius:16, padding:"16px 20px", maxWidth:520, margin:"0 auto", display:"flex", boxShadow:"0 12px 40px rgba(245,166,35,.35)" }}>
-            <span style={{ background:"rgba(0,0,0,.2)", borderRadius:8, padding:"2px 10px", fontSize:13 }}>{cartCount} items</span>
-            <span>View Cart →</span>
-            <span style={{ fontWeight:700 }}>₹{cartTotal}</span>
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ═══════════════════ CART PAGE ══════════════════ */
-function CartPage({ cart, onAdd, onRemove, onClear, user, setPage, showToast }) {
-  const [address, setAddress] = useState(user.address || "");
-  const [placing, setPlacing] = useState(false);
-  const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
-  const restaurants = [...new Set(cart.map(i => i.restaurantId))];
-  const restaurant = RESTAURANTS.find(r => r.id === restaurants[0]);
-  const delivery = restaurant?.delivery || 0;
-  const taxes = Math.round(subtotal * 0.05);
-  const total = subtotal + delivery + taxes;
-
-  const placeOrder = async () => {
-    if (!address.trim()) { showToast("Please enter a delivery address", "⚠️"); return; }
-    if (cart.length === 0) return;
-    setPlacing(true);
-    const orders = await DB.getOrders(user.uid);
-    const newOrder = {
-      id: "ORD" + Date.now(),
-      items: [...cart],
-      restaurant: restaurant?.name || "Unknown",
-      restaurantEmoji: restaurant?.emoji || "🍽️",
-      address: address.trim(),
-      subtotal, delivery, taxes, total,
-      status: "confirmed",
-      time: new Date().toISOString(),
-      eta: restaurant?.time || "30–40"
-    };
-    await DB.saveOrders(user.uid, [newOrder, ...orders]);
-    await DB.updateUser(user.uid, { address: address.trim() });
-    onClear();
-    setPlacing(false);
-    showToast("Order placed successfully! 🎉", "🎉");
-    setPage("orders");
-  };
-
-  if (cart.length === 0) return (
-    <div style={{ ...S.page, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"76px 20px 88px", textAlign:"center" }}>
-      <div style={{ fontSize:70, marginBottom:20 }}>🛒</div>
-      <div style={{ fontSize:20, fontWeight:700, marginBottom:12 }}>Your cart is empty</div>
-      <div style={{ ...S.muted, fontSize:14, marginBottom:28 }}>Add items from any restaurant to get started</div>
-      <button style={S.btnPrimary} onClick={() => setPage("home")}>Browse Restaurants →</button>
-    </div>
-  );
-
-  return (
-    <div style={{ ...S.page, padding:"76px 20px 88px", maxWidth:520, margin:"0 auto" }}>
-      <div style={{ fontSize:22, fontWeight:700, marginBottom:20, display:"flex", alignItems:"center", gap:12 }}>
-        <span>🛒</span> Your Cart
-      </div>
-
-      {restaurants.length > 1 && (
-        <div style={{ background:"rgba(255,107,107,.1)", border:"1px solid rgba(255,107,107,.25)", borderRadius:14, padding:"12px 16px", marginBottom:16, fontSize:13, color:"#FF8E8E" }}>
-          ⚠️ Items from multiple restaurants. Only one restaurant per order.
-        </div>
-      )}
-
-      <div style={{ ...S.card, marginBottom:16, overflow:"hidden" }}>
-        {cart.map(item => (
-          <div key={item.id} style={{ display:"flex", gap:14, padding:"14px 16px", borderBottom:"1px solid rgba(255,255,255,.05)" }}>
-            <div style={{ width:56, height:56, borderRadius:12, background:"rgba(255,255,255,.04)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:28, flexShrink:0 }}>
-              {restaurant?.emoji}
-            </div>
-            <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontWeight:600, fontSize:14, marginBottom:4 }}>{item.name}</div>
-              <div style={{ color:"#F5A623", fontWeight:700, fontSize:14 }}>₹{item.price}</div>
-            </div>
-            <div style={{ display:"flex", alignItems:"center", background:"rgba(245,166,35,.08)", border:"1px solid rgba(245,166,35,.25)", borderRadius:10, overflow:"hidden", height:36 }}>
-              <button onClick={() => onRemove(item.id)} style={{ width:32, height:36, background:"transparent", border:"none", color:"#F5A623", fontSize:18, fontWeight:700, cursor:"pointer" }}>−</button>
-              <span style={{ minWidth:24, textAlign:"center", fontWeight:700, fontSize:13 }}>{item.qty}</span>
-              <button onClick={() => onAdd(item, restaurant)} style={{ width:32, height:36, background:"transparent", border:"none", color:"#F5A623", fontSize:18, fontWeight:700, cursor:"pointer" }}>+</button>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ marginBottom:16 }}>
-        <label style={S.label}>Delivery Address</label>
-        <textarea style={{ ...S.input, height:80, resize:"none" }} placeholder="Enter your full delivery address…" value={address} onChange={e => setAddress(e.target.value)} />
-      </div>
-
-      <div style={{ ...S.card, padding:20, marginBottom:20 }}>
-        <div style={{ fontSize:15, fontWeight:700, marginBottom:14 }}>Bill Summary</div>
-        {[["Item Total", `₹${subtotal}`], ["Delivery Fee", delivery === 0 ? "FREE" : `₹${delivery}`], ["GST & Taxes", `₹${taxes}`]].map(([k, v]) => (
-          <div key={k} style={{ display:"flex", justifyContent:"space-between", marginBottom:10, fontSize:14, color:"#9090A8" }}>
-            <span>{k}</span><span style={{ color: v === "FREE" ? "#06D6A0" : "#F8F4EE" }}>{v}</span>
-          </div>
-        ))}
-        <div style={{ height:1, background:"rgba(255,255,255,.06)", margin:"12px 0" }} />
-        <div style={{ display:"flex", justifyContent:"space-between", fontWeight:700, fontSize:17 }}>
-          <span>Total</span><span style={{ color:"#F5A623" }}>₹{total}</span>
-        </div>
-      </div>
-
-      <button style={{ ...S.btnPrimary, width:"100%", justifyContent:"center", borderRadius:16, padding:"16px", fontSize:16, opacity: placing ? .7 : 1, boxShadow:"0 12px 40px rgba(245,166,35,.3)" }} onClick={placeOrder} disabled={placing}>
-        {placing ? "Placing Order…" : `Place Order • ₹${total}`}
-      </button>
-    </div>
-  );
-}
-
-/* ═══════════════════ ORDERS PAGE ══════════════════ */
-function OrdersPage({ user, setPage }) {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    DB.getOrders(user.uid).then(o => { setOrders(o); setLoading(false); });
-  }, [user.uid]);
-
-  const STATUS = {
-    confirmed: { label:"Order Confirmed", icon:"✅", color:"#06D6A0", steps:["confirmed"] },
-    preparing: { label:"Preparing", icon:"👨‍🍳", color:"#F5A623", steps:["confirmed","preparing"] },
-    out: { label:"Out for Delivery", icon:"🛵", color:"#38BDF8", steps:["confirmed","preparing","out"] },
-    delivered: { label:"Delivered", icon:"🎉", color:"#84CC16", steps:["confirmed","preparing","out","delivered"] },
-  };
-
-  const STEPS = [
-    { key:"confirmed", label:"Order Confirmed", icon:"✅" },
-    { key:"preparing", label:"Being Prepared", icon:"👨‍🍳" },
-    { key:"out", label:"Out for Delivery", icon:"🛵" },
-    { key:"delivered", label:"Delivered", icon:"🎉" },
-  ];
-
-  if (loading) return <div style={{ ...S.page, display:"flex", alignItems:"center", justifyContent:"center" }}><div style={{ ...S.muted }}>Loading orders…</div></div>;
-
-  if (orders.length === 0) return (
-    <div style={{ ...S.page, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"76px 20px 88px", textAlign:"center" }}>
-      <div style={{ fontSize:70, marginBottom:20 }}>📦</div>
-      <div style={{ fontSize:20, fontWeight:700, marginBottom:12 }}>No orders yet</div>
-      <div style={{ ...S.muted, fontSize:14, marginBottom:28 }}>Your order history will appear here</div>
-      <button style={S.btnPrimary} onClick={() => setPage("home")}>Start Ordering →</button>
-    </div>
-  );
-
-  return (
-    <div style={{ ...S.page, padding:"76px 20px 88px", maxWidth:520, margin:"0 auto" }}>
-      <div style={{ fontSize:22, fontWeight:700, marginBottom:20, display:"flex", alignItems:"center", gap:10 }}>📦 Your Orders</div>
-      <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-        {orders.map((order, idx) => {
-          const st = STATUS[order.status] || STATUS.confirmed;
-          const activeIdx = STEPS.findIndex(s => s.key === order.status);
-          return (
-            <div key={order.id} style={{ ...S.card, padding:20 }}>
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:14 }}>
-                <div>
-                  <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:4 }}>
-                    <span style={{ fontSize:22 }}>{order.restaurantEmoji}</span>
-                    <span style={{ fontWeight:700, fontSize:16 }}>{order.restaurant}</span>
-                  </div>
-                  <div style={{ ...S.muted, fontSize:12 }}>{order.id} • {new Date(order.time).toLocaleDateString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}</div>
-                </div>
-                <span style={{ background:`${st.color}20`, color:st.color, border:`1px solid ${st.color}40`, borderRadius:20, padding:"4px 12px", fontSize:11, fontWeight:700 }}>{st.label}</span>
-              </div>
-
-              <div style={{ background:"rgba(255,255,255,.03)", borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
-                {order.items.map(i => (
-                  <div key={i.id} style={{ display:"flex", justifyContent:"space-between", fontSize:13, marginBottom:6, color:"#9090A8" }}>
-                    <span>{i.qty}× {i.name}</span><span style={{ color:"#F8F4EE" }}>₹{i.price * i.qty}</span>
-                  </div>
-                ))}
-                <div style={{ height:1, background:"rgba(255,255,255,.06)", margin:"8px 0" }} />
-                <div style={{ display:"flex", justifyContent:"space-between", fontWeight:700, fontSize:14 }}>
-                  <span>Total Paid</span><span style={{ color:"#F5A623" }}>₹{order.total}</span>
-                </div>
-              </div>
-
-              <div style={{ position:"relative", paddingLeft:40 }}>
-                {STEPS.map((step, i) => {
-                  const done = i <= activeIdx;
-                  const active = i === activeIdx;
-                  return (
-                    <div key={step.key} style={{ position:"relative", padding:"8px 0 8px 18px" }}>
-                      {i < STEPS.length - 1 && <div style={{ position:"absolute", left:20, top:36, bottom:0, width:2, background: i < activeIdx ? "#06D6A0" : "rgba(255,255,255,.06)" }} />}
-                      <div style={{ position:"absolute", left:0, top:8, width:40, height:40, borderRadius:"50%", display:"flex", alignItems:"center", justifyContent:"center", fontSize:14, background: done ? (active ? "linear-gradient(135deg,#F5A623,#F97316)" : "#06D6A0") : "rgba(255,255,255,.04)", border: done ? "none" : "2px solid rgba(255,255,255,.08)", color: done ? "#000" : "#58586E", boxShadow: active ? "0 0 20px rgba(245,166,35,.4)" : "none" }}>
-                        {step.icon}
-                      </div>
-                      <div style={{ marginLeft:0 }}>
-                        <div style={{ fontSize:13, fontWeight: active ? 700 : 400, color: done ? "#F8F4EE" : "#58586E" }}>{step.label}</div>
-                        {active && <div style={{ ...S.muted, fontSize:11, marginTop:2 }}>ETA: {order.eta} min</div>}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════ PROFILE PAGE ══════════════════ */
-function ProfilePage({ user, setUser, onLogout, showToast }) {
-  const [edit, setEdit] = useState(false);
-  const [form, setForm] = useState({ name: user.name, phone: user.phone || "", address: user.address || "" });
-  const [saving, setSaving] = useState(false);
-
-  const save = async () => {
-    setSaving(true);
-    const updated = await DB.updateUser(user.uid, { name: form.name, phone: form.phone, address: form.address });
-    setUser(updated);
-    setSaving(false);
-    setEdit(false);
-    showToast("Profile updated!", "✓");
-  };
-
-  const initials = user.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0,2);
-
-  return (
-    <div style={{ ...S.page, padding:"76px 20px 88px", maxWidth:520, margin:"0 auto" }}>
-      <div style={{ textAlign:"center", marginBottom:28 }}>
-        <div style={{ width:80, height:80, borderRadius:"50%", background:"linear-gradient(135deg,#F5A623,#F97316)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:28, fontWeight:700, color:"#000", margin:"0 auto 12px" }}>{initials}</div>
-        <div style={{ fontSize:22, fontWeight:700 }}>{user.name}</div>
-        <div style={{ ...S.muted, fontSize:14, marginTop:4 }}>{user.email}</div>
-        <div style={{ display:"inline-flex", alignItems:"center", gap:6, marginTop:10, background:"rgba(6,214,160,.1)", border:"1px solid rgba(6,214,160,.25)", borderRadius:20, padding:"4px 14px", fontSize:12, color:"#06D6A0", fontWeight:600 }}>
-          ✓ Verified Member
-        </div>
-      </div>
-
-      <div style={{ ...S.card, padding:20, marginBottom:16 }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
-          <div style={{ fontWeight:700, fontSize:16 }}>Account Details</div>
-          <button onClick={() => setEdit(!edit)} style={{ ...S.btnOutline, padding:"8px 16px", fontSize:13 }}>{edit ? "Cancel" : "✏️ Edit"}</button>
-        </div>
-
-        {[
-          { label:"Full Name", key:"name", icon:"👤" },
-          { label:"Phone", key:"phone", icon:"📱" },
-          { label:"Saved Address", key:"address", icon:"📍" },
-        ].map(({ label, key, icon }) => (
-          <div key={key} style={{ marginBottom:16 }}>
-            <label style={S.label}>{icon} {label}</label>
-            {edit ? (
-              <input style={S.input} value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} placeholder={`Enter ${label.toLowerCase()}`}
-                onFocus={e => e.target.style.borderColor = "rgba(245,166,35,.5)"}
-                onBlur={e => e.target.style.borderColor = "rgba(255,255,255,.09)"}
-              />
-            ) : (
-              <div style={{ padding:"12px 16px", background:"rgba(255,255,255,.03)", borderRadius:12, fontSize:15, color: form[key] ? "#F8F4EE" : "#58586E" }}>{form[key] || `No ${label.toLowerCase()} added`}</div>
-            )}
-          </div>
-        ))}
-
-        {edit && (
-          <button style={{ ...S.btnPrimary, width:"100%", justifyContent:"center", opacity: saving ? .7 : 1 }} onClick={save} disabled={saving}>
-            {saving ? "Saving…" : "Save Changes"}
-          </button>
-        )}
-      </div>
-
-      <div style={{ ...S.card, padding:4, overflow:"hidden", marginBottom:16 }}>
-        {[
-          { icon:"📦", label:"Order History", action:() => {} },
-          { icon:"🔔", label:"Notifications", action:() => {} },
-          { icon:"💳", label:"Payment Methods", action:() => {} },
-          { icon:"🎁", label:"Offers & Coupons", action:() => {} },
-        ].map(({ icon, label, action }) => (
-          <div key={label} onClick={action} style={{ display:"flex", alignItems:"center", gap:14, padding:"16px 18px", cursor:"pointer", borderBottom:"1px solid rgba(255,255,255,.05)", transition:"background .2s" }}
-            onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,.04)"}
-            onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-            <span style={{ fontSize:20 }}>{icon}</span>
-            <span style={{ fontSize:15, flex:1 }}>{label}</span>
-            <span style={{ ...S.muted }}>›</span>
-          </div>
-        ))}
-      </div>
-
-      <button style={{ ...S.btnOutline, width:"100%", justifyContent:"center", borderColor:"rgba(255,107,107,.3)", color:"#FF6B6B" }} onClick={onLogout}>
-        Sign Out
-      </button>
-
-      <div style={{ textAlign:"center", marginTop:20, ...S.muted, fontSize:12 }}>
-        Member since {new Date(user.joined).toLocaleDateString("en-IN",{month:"long",year:"numeric"})}
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════ EXPLORE PAGE ══════════════════ */
-function ExplorePage({ onRestaurant }) {
-  const top = [...RESTAURANTS].sort((a, b) => b.rating - a.rating);
-  const fast = [...RESTAURANTS].sort((a, b) => parseInt(a.time) - parseInt(b.time));
-  const free = RESTAURANTS.filter(r => r.delivery === 0);
-
-  const Row = ({ title, items }) => (
-    <div style={{ marginBottom:28 }}>
-      <div style={{ fontSize:17, fontWeight:700, marginBottom:14, paddingLeft:20 }}>{title}</div>
-      <div style={{ display:"flex", gap:12, overflowX:"auto", paddingLeft:20, paddingRight:20, scrollbarWidth:"none" }}>
-        {items.map(r => (
-          <div key={r.id} onClick={() => onRestaurant(r)} style={{ minWidth:160, background:"rgba(255,255,255,.03)", border:"1px solid rgba(255,255,255,.07)", borderRadius:18, overflow:"hidden", cursor:"pointer", transition:"all .3s", flexShrink:0 }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor="rgba(245,166,35,.3)"; e.currentTarget.style.transform="translateY(-4px)"; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor="rgba(255,255,255,.07)"; e.currentTarget.style.transform="none"; }}>
-            <div style={{ height:90, background:r.bg, display:"flex", alignItems:"center", justifyContent:"center", fontSize:48 }}>{r.emoji}</div>
-            <div style={{ padding:"10px 12px" }}>
-              <div style={{ fontWeight:700, fontSize:13, marginBottom:3 }}>{r.name}</div>
-              <div style={{ ...S.muted, fontSize:11 }}>{r.cuisine} • ⭐{r.rating}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  return (
-    <div style={{ ...S.page, padding:"76px 0 88px" }}>
-      <div style={{ padding:"0 20px 20px", fontSize:22, fontWeight:700, display:"flex", alignItems:"center", gap:10 }}>🔍 Explore</div>
-
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:12, padding:"0 20px 24px" }}>
-        {[
-          { emoji:"🔥", title:"Trending", sub:`${RESTAURANTS.length} spots`, bg:"linear-gradient(135deg,#2a0800,#1a0500)" },
-          { emoji:"⚡", title:"Under 30 min", sub:`${fast.length} restaurants`, bg:"linear-gradient(135deg,#001a2a,#000f1a)" },
-          { emoji:"🆓", title:"Free Delivery", sub:`${free.length} options`, bg:"linear-gradient(135deg,#001a0d,#000f08)" },
-          { emoji:"⭐", title:"Top Rated", sub:`4.7+ stars`, bg:"linear-gradient(135deg,#1a1500,#0f0e00)" },
-        ].map(c => (
-          <div key={c.title} style={{ height:90, borderRadius:18, background:c.bg, border:"1px solid rgba(255,255,255,.07)", display:"flex", alignItems:"center", gap:12, padding:"0 16px", cursor:"pointer" }}
-            onMouseEnter={e => e.currentTarget.style.borderColor="rgba(245,166,35,.25)"}
-            onMouseLeave={e => e.currentTarget.style.borderColor="rgba(255,255,255,.07)"}>
-            <span style={{ fontSize:32 }}>{c.emoji}</span>
-            <div>
-              <div style={{ fontWeight:700, fontSize:14 }}>{c.title}</div>
-              <div style={{ ...S.muted, fontSize:12 }}>{c.sub}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <Row title="🏆 Top Rated" items={top} />
-      <Row title="⚡ Fastest Delivery" items={fast} />
-      <Row title="🆓 Free Delivery" items={free} />
-    </div>
-  );
-}
-
-/* ═══════════════════ TOAST COMPONENT ══════════════════ */
-function Toast({ toast }) {
-  return (
-    <div style={{ position:"fixed", bottom:88, left:"50%", transform: toast ? "translateX(-50%) translateY(0)" : "translateX(-50%) translateY(20px)", background:"linear-gradient(135deg,rgba(6,214,160,.95),rgba(0,180,130,.95))", color:"#000", padding:"11px 22px", borderRadius:50, fontWeight:700, fontSize:14, zIndex:9999, opacity: toast ? 1 : 0, transition:"all .35s cubic-bezier(.22,1,.36,1)", pointerEvents:"none", display:"flex", alignItems:"center", gap:8, whiteSpace:"nowrap", boxShadow:"0 8px 36px rgba(6,214,160,.3)", border:"1px solid rgba(6,214,160,.4)" }}>
-      {toast?.icon} {toast?.msg}
-    </div>
-  );
-}
-
-/* ═══════════════════ MAIN APP ══════════════════ */
-export default function FeastRush() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState("home");
-  const [restaurant, setRestaurant] = useState(null);
-  const [cart, setCart] = useState([]);
-  const [toast, showToast] = useToast();
-
-  useEffect(() => {
-    (async () => {
-      const session = await DB.getSession();
-      if (session) {
-        const users = await DB.getUsers();
-        const u = users[session.uid];
-        if (u) {
-          setUser(u);
-          const c = await DB.getCart(session.uid);
-          setCart(c);
-        }
-      }
-      setLoading(false);
-    })();
-  }, []);
-
-  const handleAuth = async (u) => {
-    setUser(u);
-    const c = await DB.getCart(u.uid);
-    setCart(c);
-  };
-
-  const handleLogout = async () => {
-    await DB.clearSession();
-    setUser(null);
-    setCart([]);
-    setPage("home");
-  };
-
-  const addToCart = async (item, rest) => {
-    if (!user) return;
-    const cartRestaurant = cart.length > 0 ? cart[0].restaurantId : null;
-    let newCart = cart;
-    if (cartRestaurant && cartRestaurant !== rest.id) {
-      newCart = [];
-    }
-    const existing = newCart.find(i => i.id === item.id);
-    const updated = existing
-      ? newCart.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i)
-      : [...newCart, { ...item, qty: 1, restaurantId: rest.id }];
-    setCart(updated);
-    await DB.saveCart(user.uid, updated);
-  };
-
-  const removeFromCart = async (itemId) => {
-    if (!user) return;
-    const updated = cart.reduce((acc, i) => {
-      if (i.id !== itemId) return [...acc, i];
-      if (i.qty > 1) return [...acc, { ...i, qty: i.qty - 1 }];
-      return acc;
-    }, []);
-    setCart(updated);
-    await DB.saveCart(user.uid, updated);
-  };
-
-  const clearCart = async () => {
-    setCart([]);
-    if (user) await DB.saveCart(user.uid, []);
-  };
-
-  const handleRestaurant = (r) => {
-    setRestaurant(r);
-    setPage("menu");
-  };
-
-  const cartCount = cart.reduce((s, i) => s + i.qty, 0);
-
-  if (loading) return (
-    <div style={{ ...S.app, display:"flex", alignItems:"center", justifyContent:"center", flexDirection:"column", gap:16 }}>
-      <Aurora />
-      <div style={{ fontSize:40, animation:"blobFloat 2s ease-in-out infinite alternate" }}>🍽️</div>
-      <div style={S.logo}>FeastRush</div>
-      <div style={{ ...S.muted, fontSize:13 }}>Loading…</div>
-    </div>
-  );
-
-  return (
-    <div style={S.app}>
-      <Aurora />
-      <div style={{ position:"relative", zIndex:2 }}>
-        <nav style={S.nav}>
-          <div style={S.logo}>FeastRush</div>
-          <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-            {user && (
-              <>
-                <div onClick={() => setPage("cart")} style={{ position:"relative", cursor:"pointer", width:40, height:40, borderRadius:12, background:"rgba(255,255,255,.05)", border:"1px solid rgba(255,255,255,.08)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:18 }}>
-                  🛒
-                  {cartCount > 0 && <span style={{ position:"absolute", top:-4, right:-4, background:"#EF4444", color:"#fff", borderRadius:"50%", width:18, height:18, fontSize:11, fontWeight:700, display:"flex", alignItems:"center", justifyContent:"center" }}>{cartCount}</span>}
-                </div>
-                <div style={{ width:36, height:36, borderRadius:"50%", background:"linear-gradient(135deg,#F5A623,#F97316)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:700, color:"#000", cursor:"pointer" }} onClick={() => setPage("profile")}>
-                  {user.name[0].toUpperCase()}
-                </div>
-              </>
-            )}
-          </div>
-        </nav>
-
-        {!user ? (
-          <AuthPage onAuth={handleAuth} />
-        ) : page === "menu" && restaurant ? (
-          <MenuPage restaurant={restaurant} cart={cart} onAdd={addToCart} onRemove={removeFromCart} setPage={setPage} showToast={showToast} />
-        ) : page === "cart" ? (
-          <CartPage cart={cart} onAdd={addToCart} onRemove={removeFromCart} onClear={clearCart} user={user} setPage={setPage} showToast={showToast} />
-        ) : page === "orders" ? (
-          <OrdersPage user={user} setPage={setPage} />
-        ) : page === "profile" ? (
-          <ProfilePage user={user} setUser={u => { setUser(u); }} onLogout={handleLogout} showToast={showToast} />
-        ) : page === "explore" ? (
-          <ExplorePage onRestaurant={handleRestaurant} />
-        ) : (
-          <HomePage user={user} setPage={setPage} onRestaurant={handleRestaurant} />
-        )}
-
-        {user && page !== "menu" && <BottomNav page={page} setPage={setPage} cartCount={cartCount} />}
-      </div>
-      <Toast toast={toast} />
-    </div>
-  );
-}
+.grid-bg{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(255,255,255,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.015) 1px,transparent 1px);background-size:50px 50px;pointer-events:none}
+.noise{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* PAGES */
+.page{display:none;position:relative;z-index:2;min-height:100vh}
+.page.active{display:block;animation:pageIn .5s cubic-bezier(.22,1,.36,1) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* GLASS */
+.gc{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:24px;backdrop-filter:blur(24px);transition:all .4s cubic-bezier(.22,1,.36,1)}
+.gc:hover{background:rgba(255,255,255,.055);border-color:var(--border2);transform:translateY(-5px);box-shadow:0 24px 64px rgba(0,0,0,.6)}
+.gcf{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:20px;backdrop-filter:blur(16px)}
+.gcd{background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:16px;backdrop-filter:blur(12px)}
+
+/* BUTTONS */
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--orange));color:#000;font-weight:700;border:none;border-radius:14px;padding:14px 28px;cursor:pointer;font-family:'Syne',sans-serif;font-size:15px;display:inline-flex;align-items:center;gap:8px;transition:all .3s;position:relative;overflow:hidden;letter-spacing:.3px}
+.btn-gold::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.25),transparent);opacity:0;transition:opacity .25s}
+.btn-gold:hover::before{opacity:1}
+.btn-gold:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(245,166,35,.4)}
+.btn-gold:active{transform:translateY(0)}
+.btn-outline{background:transparent;border:1.5px solid var(--border2);color:var(--text);border-radius:14px;padding:13px 26px;cursor:pointer;font-family:'Syne',sans-serif;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px;transition:all .25s;letter-spacing:.3px}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);background:rgba(245,166,35,.06)}
+.bico{width:44px;height:44px;border-radius:13px;background:var(--glass2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s;color:var(--muted);font-size:16px;flex-shrink:0}
+.bico:hover{background:rgba(245,166,35,.12);border-color:rgba(245,166,35,.35);color:var(--gold)}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:70px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;background:rgba(4,4,10,.75);backdrop-filter:blur(30px) saturate(180%);border-bottom:1px solid var(--border)}
+.logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:.5px;background:linear-gradient(135deg,var(--gold),var(--coral),var(--violet2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* INPUTS */
+.inp{width:100%;background:rgba(255,255,255,.04);border:1.5px solid var(--border);border-radius:14px;padding:14px 18px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:15px;outline:none;transition:all .3s}
+.inp:focus{border-color:var(--gold);background:rgba(245,166,35,.035);box-shadow:0 0 0 4px rgba(245,166,35,.07)}
+.inp::placeholder{color:var(--muted2)}
+.lbl{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.8px;margin-bottom:8px;text-transform:uppercase;font-family:'Syne',sans-serif}
+select.inp option{background:#141420}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.3px;font-family:'Syne',sans-serif}
+.bg-gold{background:rgba(245,166,35,.15);color:var(--gold);border:1px solid rgba(245,166,35,.3)}
+.bg-teal{background:rgba(6,214,160,.12);color:var(--teal);border:1px solid rgba(6,214,160,.25)}
+.bg-coral{background:rgba(255,107,107,.12);color:var(--coral);border:1px solid rgba(255,107,107,.25)}
+.bg-violet{background:rgba(124,58,237,.12);color:var(--violet2);border:1px solid rgba(124,58,237,.25)}
+.bg-sky{background:rgba(14,165,233,.12);color:var(--sky2);border:1px solid rgba(14,165,233,.25)}
+.bg-rose{background:rgba(244,63,94,.12);color:var(--rose2);border:1px solid rgba(244,63,94,.25)}
+.bg-pink{background:rgba(236,72,153,.12);color:var(--pink2);border:1px solid rgba(236,72,153,.25)}
+.bg-lime{background:rgba(132,204,22,.12);color:var(--lime2);border:1px solid rgba(132,204,22,.25)}
+.bg-orange{background:rgba(249,115,22,.12);color:var(--orange2);border:1px solid rgba(249,115,22,.25)}
+
+/* FOOD CARD */
+.fcard{border-radius:24px;overflow:hidden;background:rgba(255,255,255,.025);border:1px solid var(--border);cursor:pointer;transition:all .4s cubic-bezier(.22,1,.36,1);position:relative}
+.fcard:hover{transform:translateY(-8px) scale(1.01);border-color:rgba(245,166,35,.3);box-shadow:0 28px 70px rgba(0,0,0,.6),0 0 0 1px rgba(245,166,35,.12),inset 0 1px 0 rgba(255,255,255,.07)}
+.fcard-img{width:100%;height:210px;object-fit:cover;display:block;transition:transform .6s cubic-bezier(.22,1,.36,1)}
+.fcard:hover .fcard-img{transform:scale(1.07)}
+
+/* MENU ITEM */
+.mitem{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:20px;overflow:hidden;display:flex;transition:all .3s;position:relative}
+.mitem:hover{border-color:rgba(245,166,35,.25);background:rgba(255,255,255,.05);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.mitem-img{width:116px;min-width:116px;height:116px;object-fit:cover}
+.mitem-body{padding:14px 16px;flex:1;display:flex;flex-direction:column;justify-content:space-between;min-width:0}
+
+/* QTY */
+.qty{display:flex;align-items:center;background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.3);border-radius:12px;overflow:hidden}
+.qbtn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gold);font-size:18px;font-weight:700;transition:background .2s;border:none;background:transparent;font-family:'Syne',sans-serif}
+.qbtn:hover{background:rgba(245,166,35,.22)}
+.qn{min-width:30px;text-align:center;font-weight:700;font-size:14px;color:var(--text);font-family:'Syne',sans-serif}
+.abtn{width:36px;height:36px;border-radius:10px;background:transparent;border:1.5px solid rgba(245,166,35,.45);color:var(--gold);font-size:22px;font-weight:300;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .25s;font-family:'Syne',sans-serif}
+.abtn:hover{background:linear-gradient(135deg,var(--gold),var(--orange));color:#000;border-color:transparent;transform:scale(1.12)}
+
+/* CART */
+#cpanel{position:fixed;top:0;right:-100%;width:min(460px,100vw);height:100vh;z-index:600;background:rgba(6,6,16,.97);backdrop-filter:blur(48px) saturate(180%);border-left:1px solid var(--border2);transition:right .5s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;overflow:hidden}
+#cpanel.open{right:0;box-shadow:-20px 0 80px rgba(0,0,0,.8)}
+#cov{position:fixed;inset:0;z-index:599;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .4s}
+#cov.open{opacity:1;pointer-events:all}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:150;height:72px;display:flex;align-items:center;justify-content:space-around;background:rgba(4,4,10,.92);backdrop-filter:blur(30px);border-top:1px solid var(--border)}
+.bni{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;transition:all .2s;color:var(--muted2);min-width:54px;font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;font-family:'Syne',sans-serif}
+.bni i{font-size:21px;transition:all .25s}
+.bni.on{color:var(--gold)}
+.bni.on i{filter:drop-shadow(0 0 8px rgba(245,166,35,.7))}
+.bni:hover{color:var(--gold2)}
+
+/* SEARCHBAR */
+.srch{display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.045);border:1.5px solid var(--border);border-radius:16px;padding:0 18px;height:52px;transition:all .3s}
+.srch:focus-within{border-color:rgba(245,166,35,.45);background:rgba(245,166,35,.035);box-shadow:0 0 0 4px rgba(245,166,35,.07)}
+.srch input{background:transparent;border:none;outline:none;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:15px;flex:1}
+.srch input::placeholder{color:var(--muted2)}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:2px;height:2px}
+::-webkit-scrollbar-thumb{background:rgba(245,166,35,.25);border-radius:2px}
+::-webkit-scrollbar-track{background:transparent}
+.scx{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.scx::-webkit-scrollbar{display:none}
+
+/* PILL */
+.pill{padding:8px 18px;border-radius:22px;white-space:nowrap;background:rgba(255,255,255,.045);border:1.5px solid var(--border);cursor:pointer;transition:all .22s;font-size:13px;font-weight:600;color:var(--muted);font-family:'Syne',sans-serif;letter-spacing:.2px}
+.pill.on,.pill:hover{background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.45);color:var(--gold)}
+
+/* RATING */
+.rchip{display:inline-flex;align-items:center;gap:4px;background:rgba(6,214,160,.1);color:var(--teal);padding:3px 10px;border-radius:9px;font-size:12px;font-weight:700;border:1px solid rgba(6,214,160,.22);font-family:'Syne',sans-serif}
+
+/* PROGRESS */
+.pbar{height:4px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
+.pfill{height:100%;background:linear-gradient(90deg,var(--gold),var(--orange));border-radius:4px;transition:width .5s}
+
+/* TOAST */
+#toast{position:fixed;bottom:92px;left:50%;transform:translateX(-50%) translateY(20px);background:linear-gradient(135deg,rgba(6,214,160,.95),rgba(0,180,130,.95));color:#000;padding:12px 22px;border-radius:50px;font-weight:700;font-size:14px;z-index:9999;opacity:0;transition:all .35s cubic-bezier(.22,1,.36,1);pointer-events:none;display:flex;align-items:center;gap:8px;white-space:nowrap;backdrop-filter:blur(24px);border:1px solid rgba(6,214,160,.4);box-shadow:0 8px 36px rgba(6,214,160,.35);font-family:'Syne',sans-serif;letter-spacing:.3px}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* VEG */
+.vd{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--teal);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.vd::after{content:'';width:7px;height:7px;background:var(--teal);border-radius:50%}
+.nvd{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--coral);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.nvd::after{content:'';width:7px;height:7px;background:var(--coral);border-radius:50%}
+
+/* MAP */
+.maph{width:100%;height:200px;background:var(--s2);border-radius:20px;position:relative;overflow:hidden;border:1px solid var(--border)}
+.mapg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:28px 28px}
+.mro{position:absolute;top:44%;left:0;right:0;height:18px;background:rgba(255,255,255,.06);border-radius:2px}
+.mrv{position:absolute;top:0;bottom:0;left:38%;width:18px;background:rgba(255,255,255,.06);border-radius:2px}
+
+/* ANIMATIONS */
+@keyframes float{0%,100%{transform:translateY(0) translateX(-50%)}50%{transform:translateY(-10px) translateX(-50%)}}
+@keyframes ping{0%{transform:scale(1);opacity:.8}100%{transform:scale(2.8);opacity:0}}
+@keyframes slideUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeScale{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes floatItem{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-20px) rotate(10deg)}}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TRACKER */
+.tstep{position:relative;padding:20px 0 20px 58px}
+.tstep:not(:last-child)::before{content:'';position:absolute;left:20px;top:58px;bottom:0;width:2px;background:var(--border)}
+.tstep.done:not(:last-child)::before{background:var(--teal)}
+.ticon{position:absolute;left:0;top:20px;width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;z-index:1}
+.ticon.done{background:var(--teal);color:#000}
+.ticon.act{background:linear-gradient(135deg,var(--gold),var(--orange));color:#000;box-shadow:0 0 24px rgba(245,166,35,.55);animation:floatItem 2.5s ease-in-out infinite}
+.ticon.pend{background:var(--s3);color:var(--muted2);border:2px solid var(--border)}
+
+/* AUTH */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:2}
+.abox{width:100%;max-width:480px;background:rgba(255,255,255,.025);border:1px solid var(--border2);border-radius:32px;padding:48px;backdrop-filter:blur(36px);box-shadow:0 50px 120px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.07)}
+
+/* PROMO BANNER */
+.promo{background:linear-gradient(135deg,#140a00,#200f00,#1a0008);border:1px solid rgba(245,166,35,.2);border-radius:26px;position:relative;overflow:hidden}
+.promo::before{content:'';position:absolute;top:-60%;right:-10%;width:400px;height:400px;background:radial-gradient(circle,rgba(245,166,35,.18),transparent 65%);pointer-events:none}
+.promo::after{content:'';position:absolute;bottom:-40%;left:-5%;width:300px;height:300px;background:radial-gradient(circle,rgba(255,107,107,.12),transparent 65%);pointer-events:none}
+
+/* GTEXT */
+.gt{background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 30%,var(--coral) 60%,var(--rose2) 100%);background-size:200% 200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 4s ease infinite}
+
+/* LAYOUT */
+.pc{padding-top:82px;padding-bottom:95px;max-width:1360px;margin:0 auto}
+.px{padding-left:20px;padding-right:20px}
+.div{height:1px;background:var(--border);margin:20px 0}
+.stitle{font-size:22px;font-weight:700;margin-bottom:18px;font-family:'Playfair Display',serif}
+
+/* ERROR */
+.ferr{color:var(--coral);font-size:12px;margin-top:5px;display:none;font-family:'Syne',sans-serif}
+.ferr.on{display:block}
+.inp.err{border-color:var(--coral)}
+
+/* TOG */
+.tog{position:relative;display:inline-block;width:48px;height:27px}
+.tog input{opacity:0;width:0;height:0}
+.togs{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--s3);transition:.3s;border-radius:27px;border:1px solid var(--border)}
+.togs::before{position:absolute;content:'';height:21px;width:21px;left:2px;bottom:2px;background:#fff;transition:.3s;border-radius:50%}
+.tog input:checked+.togs{background:var(--gold)}
+.tog input:checked+.togs::before{transform:translateX(21px)}
+
+/* EV CARD */
+.evcard{border-radius:24px;overflow:hidden;background:rgba(255,255,255,.025);border:1px solid var(--border);transition:all .4s cubic-bezier(.22,1,.36,1)}
+.evcard:hover{transform:translateY(-6px);border-color:rgba(245,166,35,.25);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+
+/* CART ITEM */
+.citem{display:flex;gap:14px;padding:16px;border-bottom:1px solid var(--border)}
+.citem:last-child{border-bottom:none}
+.cimg{width:68px;height:68px;border-radius:14px;object-fit:cover;flex-shrink:0}
+
+/* LANDING */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;position:relative;z-index:2}
+.hring{position:absolute;border-radius:50%;border:1px solid rgba(245,166,35,.05);pointer-events:none}
+.hr1{width:520px;height:520px}
+.hr2{width:820px;height:820px;border-color:rgba(255,107,107,.04)}
+.hr3{width:1120px;height:1120px;border-color:rgba(124,58,237,.03)}
+.fitem{position:absolute;animation:floatItem 6s ease-in-out infinite;pointer-events:none;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))}
+
+/* STAGGER */
+.stag>*{animation:slideUp .55s both}
+.stag>*:nth-child(1){animation-delay:.04s}
+.stag>*:nth-child(2){animation-delay:.09s}
+.stag>*:nth-child(3){animation-delay:.14s}
+.stag>*:nth-child(4){animation-delay:.19s}
+.stag>*:nth-child(5){animation-delay:.24s}
+.stag>*:nth-child(6){animation-delay:.29s}
+.stag>*:nth-child(7){animation-delay:.34s}
+.stag>*:nth-child(8){animation-delay:.39s}
+.stag>*:nth-child(9){animation-delay:.44s}
+.stag>*:nth-child(10){animation-delay:.49s}
+
+/* CATEGORY ICONS */
+.catbtn{display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;min-width:72px;transition:all .25s}
+.catbtn .cico{width:64px;height:64px;border-radius:20px;display:flex;align-items:center;justify-content:center;fo
