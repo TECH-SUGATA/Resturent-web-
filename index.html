@@ -1508,21 +1508,100 @@ function renderOrders(){
 }
 function reorder(){toast('🔁 Items added to cart!');setTimeout(()=>openCart(),400);}
 
-/* ───── TOAST ───── */
-let toastTmr;
-function toast(msg){
-  const el=document.getElementById('toast');
-  document.getElementById('tm').textContent=msg;
-  el.classList.add('show');
-  clearTimeout(toastTmr);
-  toastTmr=setTimeout(()=>el.classList.remove('show'),2800);
-}
 
-/* ───── INIT ───── */
-document.addEventListener('DOMContentLoaded',()=>{
-  renderRest(R);renderSGrid(R);renderEvents(EVENTS);renderEvTeaser();updateCC();
-  buildProfMenu();
-});
+
+
+
+   
+/* ══════════════════════════════════════════════════════════
+   ORDERS
+══════════════════════════════════════════════════════════ */
+async function renderOrders(){
+  if(!CU) return;
+  const orders=await OrdersDB.get(CU.id);
+  document.getElementById('ord-badge').textContent=orders.length+(orders.length===1?' order':' orders');
+  const el=document.getElementById('ord-list');
+  if(!orders.length){
+    el.innerHTML=`<div style="text-align:center;padding:80px 22px;color:var(--muted)">
+      <div style="font-size:60px;margin-bottom:16px;animation:floatE 3s ease-in-out infinite">📦</div>
+      <div style="font-family:var(--display);font-size:22px;color:var(--text);letter-spacing:.5px;margin-bottom:8px">No orders yet</div>
+      <div style="font-size:13px;margin-bottom:24px">Your dining history will appear here</div>
+      <button class="btn-vb" style="padding:11px 22px" onclick="goPage('pg-home')"><i class="fa fa-utensils"></i> Explore Menu</button>
+    </div>`; return;
+  }
+  const stMap={
+    confirmed:{bg:'rgba(200,149,106,.08)',bc:'rgba(200,149,106,.22)',c:'var(--cham)',  icon:'fa-check',      lbl:'Confirmed'},
+    preparing:{bg:'rgba(212,168,86,.08)', bc:'rgba(212,168,86,.22)', c:'var(--amber2)',icon:'fa-fire',        lbl:'Preparing'},
+    on_the_way:{bg:'rgba(122,158,142,.08)',bc:'rgba(122,158,142,.22)',c:'var(--sage2)', icon:'fa-motorcycle',  lbl:'On the Way'},
+    delivered: {bg:'rgba(122,158,142,.1)', bc:'rgba(122,158,142,.25)',c:'var(--sage2)', icon:'fa-circle-check',lbl:'Delivered'},
+  };
+  el.innerHTML=orders.map(o=>{
+    const st=stMap[o.status]||stMap.confirmed;
+    const d=new Date(o.placedAt);
+    const ds=d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    const ts=d.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    return`<div class="ord-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:11px">
+        <div>
+          <div style="font-family:var(--sans);font-size:15px;font-weight:800;letter-spacing:.5px">#${o.id}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px">${ds} · ${ts}</div>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1px solid ${st.bc};background:${st.bg}">
+          <i class="fa-solid ${st.icon}" style="color:${st.c};font-size:10px"></i>
+          <span style="color:${st.c};font-size:10px;font-weight:800;font-family:var(--sans);letter-spacing:.5px">${st.lbl}</span>
+        </div>
+      </div>
+      <div style="background:rgba(255,240,230,.02);border-radius:12px;padding:11px;margin-bottom:11px;border:1px solid var(--border)">
+        <div style="font-size:26px;margin-bottom:5px;line-height:1">${o.items.map(i=>i.emoji).slice(0,6).join(' ')}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${o.items.map(i=>`<span style="background:rgba(255,240,230,.04);border:1px solid var(--border);padding:2px 8px;border-radius:7px;font-size:10px;color:var(--muted)">${i.name} ×${i.qty}</span>`).join('')}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px">
+        <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;flex:1;min-width:0">
+          <i class="fa fa-location-dot" style="color:var(--rose);flex-shrink:0"></i>
+          <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${o.address}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <span style="font-size:11px;color:var(--muted2)"><i class="fa fa-credit-card" style="color:var(--sage2)"></i> ${o.payment}</span>
+          <span style="font-size:20px;font-weight:800;color:var(--cham);font-family:var(--sans)">₹${o.total}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+ 
+/* ══════════════════════════════════════════════════════════
+   COUNTDOWN
+══════════════════════════════════════════════════════════ */
+function startCD(){
+  let end=Date.now()+(3*3600+45*60)*1000;
+  setInterval(()=>{
+    const d=Math.max(0,end-Date.now());
+    const h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);
+    const eh=document.getElementById('cd-h'),em=document.getElementById('cd-m'),es=document.getElementById('cd-s');
+    if(eh)eh.textContent=pad(h);if(em)em.textContent=pad(m);if(es)es.textContent=pad(s);
+    if(d<=0)end=Date.now()+(3*3600+45*60)*1000;
+  },1000);
+}
+ 
+/* ══════════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════════ */
+let _tt;
+function toast(msg){
+  const el=document.getElementById('vb-toast');
+  el.innerHTML='<i class="fa fa-circle-check"></i> '+msg;
+  el.classList.add('on'); clearTimeout(_tt);
+  _tt=setTimeout(()=>el.classList.remove('on'),3400);
+}
+ 
+/* HELPERS */
+function pad(n){return String(n).padStart(2,'0');}
+function fn(name){return(name||'').split(' ')[0];}
+ 
+document.addEventListener('DOMContentLoaded',boot);
 </script>
 </body>
 </html>
+ 
